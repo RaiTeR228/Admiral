@@ -5,6 +5,9 @@
     то надо указывать явные приложения python manage.py makemigrations car hors km
     ps: проверить settings.py(переменная INSTALLED_APPS) в config, указаны ли все приложения
 
+создание проекта
+    [ ] django-admin startproject config
+
 [ ] pip install django djangorestframework psycopg (если не установлен)
 [ ] python manage.py makemigrations
 [ ] python manage.py migrate
