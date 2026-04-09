@@ -28,6 +28,7 @@ Including another URLconf
 from django.urls import path
 from Server.api import RegisterServerView
 from Metric.api import ReceiveStatsView, ServerStatListView
+from Metric.views import *
 
 urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),
@@ -35,4 +36,6 @@ urlpatterns = [
     path("api/stats/list/", ServerStatListView.as_view()),
     path("api/ssh_logs/", RegisterServerView.as_view()),  # Добавляем URL для логов SSH
     path("api/server_info/", RegisterServerView.as_view()),  # Добавляем URL для информации о сервере
+    
+    path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
 ]
