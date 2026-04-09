@@ -30,6 +30,7 @@ python manage.py makemigrations
 python manage.py migrate
 
 
+
 Поля бд
 текстовые поля
     CharField - строка с ограничением длины - name = models.CharField(max_length=100)
@@ -71,3 +72,9 @@ cd client
 npm install
 npm install axios
 nmp run dev
+
+
+
+js native
+npx expo start
+https://docs.expo.dev/get-started/start-developing/
