@@ -33,4 +33,6 @@ urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),
     path("api/stats/", ReceiveStatsView.as_view()),
     path("api/stats/list/", ServerStatListView.as_view()),
+    path("api/ssh_logs/", RegisterServerView.as_view()),  # Добавляем URL для логов SSH
+    path("api/server_info/", RegisterServerView.as_view()),  # Добавляем URL для информации о сервере
 ]

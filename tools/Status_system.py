@@ -1,6 +1,8 @@
 import psutil
 import platform
 from datetime import datetime
+import GPUtil
+from tabulate import tabulate
 
 
 def get_size(bytes, suffix="B"):
@@ -27,7 +29,15 @@ def Status_Server():
             # "net_recv": get_size(psutil.net_io_counters().bytes_recv),
         # }
     }
-
+######### Получение информации о системе, процессоре, оперативной памяти, SWAP, дисках, сети и GPU
+def get_cpu_cores_info():
+    """Получение информации о ядрах процессора"""
+    return {
+        "physical_cores": psutil.cpu_count(logical=False),  # физические ядра
+        "logical_cores": psutil.cpu_count(logical=True),    # логические ядра (с гипертредингом)
+        "total_cores": psutil.cpu_count(),                   # всего ядер
+    }
+######################################################
 def System_Info():
     uname = platform.uname()
     return {
@@ -51,7 +61,7 @@ def Cpu_Info():
         "cpu_usage_per_core": [f"Core {i}: {percentage}%" for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1))],
         "total_cpu_usage": f"{psutil.cpu_percent()}%",
     }
-print(Cpu_Info())
+# print(Cpu_Info())
 
 def Ram_Info():
     ram = psutil.virtual_memory()
@@ -72,76 +82,83 @@ def Swap_Info():
     }
 
 # # Disk Information
-# print("="*40, "Disk Information", "="*40)
+
 # print("Partitions and Usage:")
-# # get all disk partitions
-# partitions = psutil.disk_partitions()
-# for partition in partitions:
-#     print(f"=== Device: {partition.device} ===")
-#     print(f"  Mountpoint: {partition.mountpoint}")
-#     print(f"  File system type: {partition.fstype}")
-#     try:
-#         partition_usage = psutil.disk_usage(partition.mountpoint)
-#     except PermissionError:
-#         # this can be catched due to the disk that
-#         # isn't ready
-#         continue
-#     print(f"  Total Size: {get_size(partition_usage.total)}")
-#     print(f"  Used: {get_size(partition_usage.used)}")
-#     print(f"  Free: {get_size(partition_usage.free)}")
-#     print(f"  Percentage: {partition_usage.percent}%")
-# # get IO statistics since boot
-# disk_io = psutil.disk_io_counters()
-# print(f"Total read: {get_size(disk_io.read_bytes)}")
-# print(f"Total write: {get_size(disk_io.write_bytes)}")
+def Disk_Info():
+    partitions = psutil.disk_partitions()
+    
+    for partition in partitions:
+        print(f"=== Device: {partition.device} ===")
+        print(f"  Mountpoint: {partition.mountpoint}")
+        print(f"  File system type: {partition.fstype}")
+        try:
+            partition_usage = psutil.disk_usage(partition.mountpoint)
+        except PermissionError:
+            print("нету прав доступа, запустите от имени администратора")
+            # this can be catched due to the disk that
+            # isn't ready
+            continue
+        print(f"  Total Size: {get_size(partition_usage.total)}")
+        print(f"  Used: {get_size(partition_usage.used)}")
+        print(f"  Free: {get_size(partition_usage.free)}")
+        print(f"  Percentage: {partition_usage.percent}%")
+    # get IO statistics since boot
+    disk_io = psutil.disk_io_counters()
+    print(f"Total read: {get_size(disk_io.read_bytes)}")
+    print(f"Total write: {get_size(disk_io.write_bytes)}")
+    
+    return {"Device": partitions.device, "Mountpoint": partitions.mountpoint, "File system type": partitions.fstype, "Total Size": get_size(partition_usage.total), "Used": get_size(partition_usage.used), "Free": get_size(partition_usage.free), "Percentage": partition_usage.percent}
 
 # # Network information
-# print("="*40, "Network Information", "="*40)
-# # get all network interfaces (virtual and physical)
-# if_addrs = psutil.net_if_addrs()
-# for interface_name, interface_addresses in if_addrs.items():
-#     for address in interface_addresses:
-#         print(f"=== Interface: {interface_name} ===")
-#         if str(address.family) == 'AddressFamily.AF_INET':
-#             print(f"  IP Address: {address.address}")
-#             print(f"  Netmask: {address.netmask}")
-#             print(f"  Broadcast IP: {address.broadcast}")
-#         elif str(address.family) == 'AddressFamily.AF_PACKET':
-#             print(f"  MAC Address: {address.address}")
-#             print(f"  Netmask: {address.netmask}")
-#             print(f"  Broadcast MAC: {address.broadcast}")
-# # get IO statistics since boot
-# net_io = psutil.net_io_counters()
-# print(f"Total Bytes Sent: {get_size(net_io.bytes_sent)}")
-# print(f"Total Bytes Received: {get_size(net_io.bytes_recv)}")
+
+# get all network interfaces (virtual and physical)
+def Network_Info():
+    if_addrs = psutil.net_if_addrs()
+    for interface_name, interface_addresses in if_addrs.items():
+        for address in interface_addresses:
+            print(f"=== Interface: {interface_name} ===")
+            if str(address.family) == 'AddressFamily.AF_INET':
+                print(f"  IP Address: {address.address}")
+                print(f"  Netmask: {address.netmask}")
+                print(f"  Broadcast IP: {address.broadcast}")
+            elif str(address.family) == 'AddressFamily.AF_PACKET':
+                print(f"  MAC Address: {address.address}")
+                print(f"  Netmask: {address.netmask}")
+                print(f"  Broadcast MAC: {address.broadcast}")
+    # get IO statistics since boot
+    net_io = psutil.net_io_counters()
+    print(f"Total Bytes Sent: {get_size(net_io.bytes_sent)}")
+    print(f"Total Bytes Received: {get_size(net_io.bytes_recv)}")
+
+    return {"Interface": interface_name, "IP Address": address.address, "Netmask": address.netmask, "Broadcast IP": address.broadcast, "MAC Address": address.address, "Broadcast MAC": address.broadcast, "Total Bytes Sent": get_size(net_io.bytes_sent), "Total Bytes Received": get_size(net_io.bytes_recv)}
 
 
 # # GPU information
-# import GPUtil
-# from tabulate import tabulate
-# print("="*40, "GPU Details", "="*40)
-# gpus = GPUtil.getGPUs()
-# list_gpus = []
-# for gpu in gpus:
-#     # get the GPU id
-#     gpu_id = gpu.id
-#     # name of GPU
-#     gpu_name = gpu.name
-#     # get % percentage of GPU usage of that GPU
-#     gpu_load = f"{gpu.load*100}%"
-#     # get free memory in MB format
-#     gpu_free_memory = f"{gpu.memoryFree}MB"
-#     # get used memory
-#     gpu_used_memory = f"{gpu.memoryUsed}MB"
-#     # get total memory
-#     gpu_total_memory = f"{gpu.memoryTotal}MB"
-#     # get GPU temperature in Celsius
-#     gpu_temperature = f"{gpu.temperature} °C"
-#     gpu_uuid = gpu.uuid
-#     list_gpus.append((
-#         gpu_id, gpu_name, gpu_load, gpu_free_memory, gpu_used_memory,
-#         gpu_total_memory, gpu_temperature, gpu_uuid
-#     ))
+def Gpu_Info():
+    # print("="*40, "GPU Details", "="*40)
+    gpus = GPUtil.getGPUs()
+    list_gpus = []
+    for gpu in gpus:
+        # get the GPU id
+        gpu_id = gpu.id
+        # name of GPU
+        gpu_name = gpu.name
+        # get % percentage of GPU usage of that GPU
+        gpu_load = f"{gpu.load*100}%"
+        # get free memory in MB format
+        gpu_free_memory = f"{gpu.memoryFree}MB"
+        # get used memory
+        gpu_used_memory = f"{gpu.memoryUsed}MB"
+        # get total memory
+        gpu_total_memory = f"{gpu.memoryTotal}MB"
+        # get GPU temperature in Celsius
+        gpu_temperature = f"{gpu.temperature} °C"
+        gpu_uuid = gpu.uuid
+        list_gpus.append((
+            gpu_id, gpu_name, gpu_load, gpu_free_memory, gpu_used_memory,
+            gpu_total_memory, gpu_temperature, gpu_uuid
+        ))
+        return {"id": gpu_id, "name": gpu_name, "load": gpu_load, "free memory": gpu_free_memory, "used memory": gpu_used_memory, "total memory": gpu_total_memory, "temperature": gpu_temperature, "uuid": gpu_uuid}
 
 # print(tabulate(list_gpus, headers=("id", "name", "load", "free memory", "used memory", "total memory",
 #                                    "temperature", "uuid")))
