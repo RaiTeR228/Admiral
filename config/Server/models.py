@@ -8,6 +8,10 @@ class Server(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     ip = models.GenericIPAddressField(null=True, blank=True) # ip будет скорее динамичным и не будет в бд храниться, но на всякий случай добавим
 
+    SystemPC = models.CharField(max_length=100,null=True, blank=True, help_text="Система пк")
+    Local_Name_PC = models.CharField(max_length=100,null=True, blank=True, help_text="Локальное имя пк")
+    # Release = models.IntegerField()
+    
     MAX_CPU_CORES = models.CharField(max_length=255, null=True, blank=True, help_text="Максимальное количество ядер CPU")
     MAX_CPU_THREADS = models.CharField(max_length=255, null=True, blank=True, help_text="Максимальное количество потоков CPU")
     CPU_NAME = models.CharField(max_length=255, null=True, blank=True)

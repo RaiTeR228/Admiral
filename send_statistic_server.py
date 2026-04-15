@@ -2,33 +2,28 @@ import time
 import requests
 from tools.Status_system import *
 
-# API_URL = "http://127.0.0.1:8000/api/stats/"
-API_URL = "http://127.0.0.1:8000/api/server_info/" 
+API_URL = "http://127.0.0.1:8000/api/stats/"
 API_KEY = "f03cbdecb1b228b5ab020adad9f3263efbc21c8a2ee0f0c8d381dcf5e360ca95"
-# API_KEY = "SUPER_SECRET_123"
 
 def collect_stats():
     cpu = Cpu_Info()
+    ram = Ram_Info()
+    swap= Swap_Info()
     cpu_name = System_Info()
     return {
-        "name": "server-1",
+        # "name": "server-1",
+        "server_id": '1',
         "install_token": "SUPER_SECRET_123",
         "ip": get_local_ip(),
 
-        "cpu": Status_Server()["cpu"],
-        "MAX_CPU_CORES": str(cpu["physical_cores"]),
-        "MAX_CPU_THREADS":  str(cpu["total_cores"]),
-        "CPU_NAME": str(cpu_name["processor_name"]),
-        "Local_Name_PC": str(cpu_name["node_name"]),
-
-        "MAX_RAM": Ram_Info()["total"],
-
-        "MAX_SWAP": Swap_Info()["total"]
+        "Use_Ram": ram['used'],
+        "Use_Cpu":cpu['total_cpu_usage'],
+        "Use_Swap": swap['used']
     }
 
 while True:
     data = collect_stats()
-    print("Отправляем:", data)  # Посмотрите, что отправляется
+    print("Отправляем:", data)
     
     try:
         response = requests.post(

@@ -31,17 +31,25 @@ def get_server_from_request(request):
 
 
 class ReceiveStatsView(APIView):
+
+    
     def post(self, request):
         server = get_server_from_request(request)
+
+        def clean_percent(value):
+            if not value:
+                return None
+            return float(str(value).replace('%', '').strip())
 
         if not server:
             return Response({"error": "Unauthorized"}, status=403)
 
         ServerStat.objects.create(
             server=server,
-            cpu=request.data.get("cpu"),
-            ram=request.data.get("ram"),
-            IO=request.data.get("IO"),
+            Use_Cpu=clean_percent(request.data.get("Use_Cpu")), 
+            Use_Ram=clean_percent(request.data.get("Use_Ram")),    
+            Use_Swap=clean_percent(request.data.get("Use_Swap")),  
+            # IO=request.data.get("IO"),
         )
 
         return Response({"status": "ok"})

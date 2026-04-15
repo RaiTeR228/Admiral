@@ -1,8 +1,13 @@
 import psutil
 import platform
 from datetime import datetime
-import GPUtil
-from tabulate import tabulate
+import socket
+# import GPUtil
+# from tabulate import tabulate
+import cpuinfo
+
+
+
 
 
 def get_size(bytes, suffix="B"):
@@ -17,6 +22,8 @@ def get_size(bytes, suffix="B"):
         if bytes < factor:
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
+def get_size_to_mb(bytes):
+    return{bytes * 1024*1024}
 
 def Status_Server():
     return {
@@ -29,15 +36,7 @@ def Status_Server():
             # "net_recv": get_size(psutil.net_io_counters().bytes_recv),
         # }
     }
-######### Получение информации о системе, процессоре, оперативной памяти, SWAP, дисках, сети и GPU
-def get_cpu_cores_info():
-    """Получение информации о ядрах процессора"""
-    return {
-        "physical_cores": psutil.cpu_count(logical=False),  # физические ядра
-        "logical_cores": psutil.cpu_count(logical=True),    # логические ядра (с гипертредингом)
-        "total_cores": psutil.cpu_count(),                   # всего ядер
-    }
-######################################################
+
 def System_Info():
     uname = platform.uname()
     return {
@@ -46,15 +45,19 @@ def System_Info():
         "release": uname.release,
         "version": uname.version,
         "machine": uname.machine,
-        "processor": uname.processor,
+        # "processor": uname.processor,
         "boot_time": datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S"),
+        "processor_name": cpuinfo.get_cpu_info()
+        # print(cpu_info['brand_raw'])
     }
 
 def Cpu_Info():
     cpufreq = psutil.cpu_freq()
     return {
-        "physical_cores": psutil.cpu_count(logical=False),
-        "total_cores": psutil.cpu_count(logical=True),
+        "physical_cores": psutil.cpu_count(logical=False), # физические ядра
+        "total_cores": psutil.cpu_count(logical=True),# логические ядра
+        "total_cores": psutil.cpu_count(),# всего ядер
+
         "max_frequency": f"{cpufreq.max:.2f}Mhz",
         "min_frequency": f"{cpufreq.min:.2f}Mhz",
         "current_frequency": f"{cpufreq.current:.2f}Mhz",
@@ -68,8 +71,14 @@ def Ram_Info():
     return {
         "total": get_size(ram.total),
         "available": get_size(ram.available),
-        "used": get_size(ram.used),
+        # "used": get_size(ram.used),
+        "used": str(ram.used),
         "percentage": ram.percent
+
+# total — общий объём физической памяти в байтах;
+# available — доступный объём памяти;
+# used — объём используемой памяти;
+# percent — процент использования памяти.
     }
 
 def Swap_Info():
@@ -77,7 +86,7 @@ def Swap_Info():
     return {
         "total": get_size(swap.total),
         "free": get_size(swap.free),
-        "used": get_size(swap.used),
+        "used": (swap.used),
         "percentage": swap.percent
     }
 
@@ -132,11 +141,17 @@ def Network_Info():
 
     return {"Interface": interface_name, "IP Address": address.address, "Netmask": address.netmask, "Broadcast IP": address.broadcast, "MAC Address": address.address, "Broadcast MAC": address.broadcast, "Total Bytes Sent": get_size(net_io.bytes_sent), "Total Bytes Received": get_size(net_io.bytes_recv)}
 
+def get_local_ip():
+    hostname = socket.gethostname()
+    _, _, ip_addresses = socket.gethostbyname_ex(hostname)
+    # Фильтруем loopback-адреса (начинающиеся с 127.)
+    filtered_ips = [ip for ip in ip_addresses if not ip.startswith("127.")]
+    return filtered_ips if filtered_ips else None 
 
 # # GPU information
 def Gpu_Info():
     # print("="*40, "GPU Details", "="*40)
-    gpus = GPUtil.getGPUs()
+    gpus = 1#GPUtil.getGPUs()
     list_gpus = []
     for gpu in gpus:
         # get the GPU id
