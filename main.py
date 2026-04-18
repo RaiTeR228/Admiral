@@ -1,19 +1,27 @@
-# начальный скрипт для запуска
 import os
-from django.core.management import call_command
-import django
 import sys
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(BASE_DIR)
+def main():
+    # ПРАВИЛЬНЫЙ путь - с двумя config
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.config.settings')
-
-django.setup()
-def init():
     try:
+        import django
+        django.setup()
+        
+        from django.core.management import call_command
+        
+        print("✅ Django инициализирован")
+        print("🔄 Применяю миграции...")
         call_command('migrate', interactive=False)
-    except Exception as e:
-        print("Ошибка миграции:", e)
+        
+        print("🚀 Запускаю сервер на http://127.0.0.1:8000")
+        call_command('runserver', '127.0.0.1:8000')
+        
+    except ImportError as e:
+        print(f"❌ Ошибка: {e}")
+        print(f"Путь к настройкам: config.settings")
+        sys.exit(1)
 
-init()
+if __name__ == '__main__':
+    main()

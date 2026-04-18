@@ -6,7 +6,7 @@ from rest_framework.generics import ListAPIView
 from .models import ServerStat
 from rest_framework.serializers import ModelSerializer
 
-from Server.models import Server
+from server.models import Server
 from .models import ServerStat
 
 

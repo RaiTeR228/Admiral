@@ -26,9 +26,9 @@ Including another URLconf
 # urls.py
 
 from django.urls import path
-from Server.api import RegisterServerView
-from Metric.api import ReceiveStatsView, ServerStatListView
-from Metric.views import *
+from server.api import RegisterServerView
+from metric.api import ReceiveStatsView, ServerStatListView
+from metric.views import *
 
 urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),

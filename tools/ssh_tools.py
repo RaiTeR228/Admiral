@@ -2,7 +2,7 @@ import re
 import time
 from datetime import datetime
 
-AUTH_LOG = "/var/log/auth.log"  # Стандартный путь для Ubuntu
+AUTH_LOG = "/var/log/auth.log"
 
 def monitor_ssh_log():
     """Мониторинг SSH логов в реальном времени"""

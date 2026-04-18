@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ServerConfig(AppConfig):
+class MetricConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "Server"
+    name = "config.metric"
