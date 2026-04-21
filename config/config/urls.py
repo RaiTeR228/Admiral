@@ -15,9 +15,34 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
+# from django.contrib import admin
+# from django.urls import path
+
+# urlpatterns = [
+#     path("admin/", admin.site.urls),
+# ]
+
 from django.urls import path
+from Server.api import RegisterServerView
+from config.Metric.api import ReceiveStatsView, ServerStatListView
+from Metric.views import *
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from . import views
+
+router = DefaultRouter()
+router.register(r'ssh-logs', views.SSHLogViewSet, basename='ssh-log')
+
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("api/register/", RegisterServerView.as_view()),
+    path("api/stats/", ReceiveStatsView.as_view()),
+    path("api/stats/list/", ServerStatListView.as_view()),
+    path("api/ssh_logs/", RegisterServerView.as_view()),  
+    path("api/server_info/", RegisterServerView.as_view()),  
+    
+    path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
+    path('api/', include(router.urls)),
 ]
+
+

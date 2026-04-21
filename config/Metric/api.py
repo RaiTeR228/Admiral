@@ -3,11 +3,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
-from .models import ServerStat
+from Metric.models import ServerStat
 from rest_framework.serializers import ModelSerializer
 
-from server.models import Server
-from .models import ServerStat
+from Server.models import Server
+from Metric.models import ServerStat
 
 
 def get_server_from_request(request):
