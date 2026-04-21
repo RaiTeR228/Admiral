@@ -11,8 +11,7 @@
 
 создание проекта
     [ ] django-admin startproject config
-
-python manage.py startapp Server
+    [ ] python manage.py startapp Server
 
 [ ] pip install django djangorestframework psycopg (если не установлен)
 [ ] python manage.py makemigrations
