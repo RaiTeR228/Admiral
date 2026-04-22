@@ -1,7 +1,7 @@
 # apps/monitoring/models.py
 
 from django.db import models
-from Server.models import Server
+from server.models import Server
 
 class ServerStat(models.Model):
     server = models.ForeignKey(Server, on_delete=models.CASCADE,null=True, blank=True)

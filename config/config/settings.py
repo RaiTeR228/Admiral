@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "Metric",
-    "Server"
+    "rest_framework",
+    "metric",
+    "server",
+    "sshlog",
 ]
 
 MIDDLEWARE = [

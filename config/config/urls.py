@@ -23,12 +23,13 @@ Including another URLconf
 # ]
 
 from django.urls import path
-from Server.api import RegisterServerView
-from config.Metric.api import ReceiveStatsView, ServerStatListView
-from Metric.views import *
+from server.api import RegisterServerView
+from metric.api import ReceiveStatsView, ServerStatListView
+from metric.views import *
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+# from . import views
+from sshlog import views
 
 router = DefaultRouter()
 router.register(r'ssh-logs', views.SSHLogViewSet, basename='ssh-log')
