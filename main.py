@@ -1,20 +1,26 @@
+# main_with_migrations.py
 import os
 import sys
+import subprocess
+from pathlib import Path
 
-def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+project_root = Path(__file__).parent
+model_path = project_root / 'models'
+os.chdir(model_path)
 
-    try:
-        import django
-        django.setup()
-        
-        from django.core.management import call_command
-        call_command('migrate', interactive=False)
-        call_command('runserver', '127.0.0.1:8000')
-        
-    except ImportError as e:
-        print(f"❌ Ошибка: {e}")
-        sys.exit(1)
+def run_command(cmd):
+    print(f"▶️ {cmd}")
+    subprocess.run(cmd, shell=True)
 
-if __name__ == '__main__':
-    main()
+print("🚀 Запуск Admiral с миграциями...")
+
+# Выполняем миграции
+run_command(f"{sys.executable} manage.py makemigrations")
+run_command(f"{sys.executable} manage.py migrate")
+
+# Запускаем сервер
+print("\n🌐 Запуск Django сервера...")
+try:
+    subprocess.run([sys.executable, 'manage.py', 'runserver', '0.0.0.0:8000'])
+except KeyboardInterrupt:
+    print("\n✅ Остановлено")
