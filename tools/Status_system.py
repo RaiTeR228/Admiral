@@ -54,10 +54,8 @@ def System_Info():
 def Cpu_Info():
     cpufreq = psutil.cpu_freq()
     return {
-        "physical_cores": psutil.cpu_count(logical=False), # физические ядра
-        "total_cores": psutil.cpu_count(logical=True),# логические ядра
-        "total_cores": psutil.cpu_count(),# всего ядер
-
+        "physical_cores": psutil.cpu_count(logical=False), 
+        "total_cores": psutil.cpu_count(logical=True),
         "max_frequency": f"{cpufreq.max:.2f}Mhz",
         "min_frequency": f"{cpufreq.min:.2f}Mhz",
         "current_frequency": f"{cpufreq.current:.2f}Mhz",

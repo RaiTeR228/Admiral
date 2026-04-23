@@ -1,5 +1,8 @@
 import time
 import requests
+import psutil
+import platform
+from cpuinfo import get_cpu_info  # Добавьте эту библиотеку
 from tools.Status_system import *
 
 # API_URL = "http://127.0.0.1:8000/api/stats/"
@@ -7,9 +10,37 @@ API_URL = "http://127.0.0.1:8000/api/server_info/"
 API_KEY = "f03cbdecb1b228b5ab020adad9f3263efbc21c8a2ee0f0c8d381dcf5e360ca95"
 # API_KEY = "SUPER_SECRET_123"
 
+
+
+def get_cpu_name():
+    """Получение названия процессора"""
+    try:
+        # Способ 1: через cpuinfo библиотеку
+        cpu_info = get_cpu_info()
+        brand_raw = cpu_info.get('brand_raw', '')
+        if brand_raw:
+            return brand_raw
+    except:
+        pass
+    
+    try:
+        # Способ 2: через platform модуль
+        processor = platform.processor()
+        if processor:
+            return processor
+    except:
+        pass
+    
+    try:
+        # Способ 3: через psutil (не всегда работает)
+        # Некоторые системы хранят инфу о процессоре здесь
+        return "Unknown CPU"
+    except:
+        return "Unknown CPU"
+
 def collect_stats():
     cpu = Cpu_Info()
-    cpu_name = System_Info()
+    
     return {
         "name": "server-1",
         "install_token": "SUPER_SECRET_123",
@@ -18,8 +49,8 @@ def collect_stats():
         "cpu": Status_Server()["cpu"],
         "MAX_CPU_CORES": str(cpu["physical_cores"]),
         "MAX_CPU_THREADS":  str(cpu["total_cores"]),
-        "CPU_NAME": str(cpu_name["processor_name"]),
-        "Local_Name_PC": str(cpu_name["node_name"]),
+        "CPU_NAME": get_cpu_name(),  # Используем новую функцию
+        "Local_Name_PC": platform.node(),  # Имя компьютера
 
         "MAX_RAM": Ram_Info()["total"],
 

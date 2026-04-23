@@ -11,8 +11,8 @@ def collect_stats():
     swap= Swap_Info()
     cpu_name = System_Info()
     return {
-        # "name": "server-1",
-        "server_id": '1',
+        "name": "server-1",
+        # "server_id": '1',
         "install_token": "SUPER_SECRET_123",
         "ip": get_local_ip(),
 

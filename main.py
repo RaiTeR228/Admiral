@@ -9,18 +9,18 @@ model_path = project_root / 'models'
 os.chdir(model_path)
 
 def run_command(cmd):
-    print(f"▶️ {cmd}")
+    print(f"{cmd}")
     subprocess.run(cmd, shell=True)
 
-print("🚀 Запуск Admiral с миграциями...")
+print("----------запуск миграции")
 
 # Выполняем миграции
 run_command(f"{sys.executable} manage.py makemigrations")
 run_command(f"{sys.executable} manage.py migrate")
 
 # Запускаем сервер
-print("\n🌐 Запуск Django сервера...")
+print("\n----------Запуск сервера")
 try:
-    subprocess.run([sys.executable, 'manage.py', 'runserver', '0.0.0.0:8000'])
+    subprocess.run([sys.executable, 'manage.py', 'runserver',])#'0.0.0.0:8000'
 except KeyboardInterrupt:
-    print("\n✅ Остановлено")
+    print("\n----------Остановлено")
