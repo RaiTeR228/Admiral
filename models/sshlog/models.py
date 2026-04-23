@@ -26,6 +26,7 @@ class SSHLogEntry(models.Model):
         ('success', 'Успешный вход'),
         ('failed', 'Неудачная попытка'),
     )
+    UuidServer = models.CharField(max_length=255)
     
     event_type = models.CharField(max_length=10, choices=EVENT_TYPES)
     username = models.CharField(max_length=255)

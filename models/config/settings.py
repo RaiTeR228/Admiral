@@ -41,6 +41,10 @@ INSTALLED_APPS = [
     "metric",
     "server",
     "sshlog",
+    "cpu",
+    "gpu",
+    "disk",
+    "ram",
 ]
 
 MIDDLEWARE = [
