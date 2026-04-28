@@ -7,7 +7,7 @@ from tools.Status_system import *
 
 # API_URL = "http://127.0.0.1:8000/api/stats/"
 API_URL = "http://127.0.0.1:8000/api/server_info/" 
-API_KEY = "f03cbdecb1b228b5ab020adad9f3263efbc21c8a2ee0f0c8d381dcf5e360ca95"
+API_KEY = "f62f116a4c29eea1eff6d28cf7a8215acb6e151a3c1954db914fac03505ce1e2"
 # API_KEY = "SUPER_SECRET_123"
 
 

@@ -78,3 +78,22 @@ nmp run dev
 js native
 npx expo start
 https://docs.expo.dev/get-started/start-developing/
+
+fail2ban
+
+https://secureflow.ru/guides/fail2ban-nastroyka-zashchita-ssh
+Пример /etc/fail2ban/jail.local:
+
+[sshd]
+enabled = true
+port = ssh
+maxretry = 2
+bantime = 10m
+findtime = 5m
+Пояснение параметров:
+
+enabled — включить фильтр
+port — порт SSH (можно указать нестандартный)
+maxretry — сколько неудачных попыток допускается
+findtime — за какой период анализируются попытки
+bantime — время блокировки IP

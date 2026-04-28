@@ -49,7 +49,7 @@ def run_migrations():
     # Возвращаемся обратно
     os.chdir(project_root)
 
-def run_django_server(host='0.0.0.0', port='8000'):
+def run_django_server(host='127.0.0.1', port='8000'):
     """Запуск Django сервера"""
     print(f"\n---------- Запуск Django сервера на {host}:{port}")
     os.chdir(model_path)
@@ -62,6 +62,233 @@ def run_django_server(host='0.0.0.0', port='8000'):
         print("\nОстановка сервера...")
     finally:
         os.chdir(project_root)
+
+def init_django():
+    """Инициализация Django для доступа к моделям"""
+    # Добавляем путь к папке models
+    sys.path.insert(0, str(model_path))
+    
+    # Устанавливаем настройки Django
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    
+    # Инициализируем Django
+    import django
+    django.setup()
+
+def generate_api_token():
+    """Генерация API токена для сервера"""
+    print("\n" + "=" * 50)
+    print("🔐 ГЕНЕРАЦИЯ API ТОКЕНА")
+    print("=" * 50)
+    
+    try:
+        # Инициализируем Django
+        init_django()
+        
+        # Импортируем модель Server из правильного места
+        from server.models import Server
+        import secrets
+        
+        print("\n📝 Введите данные сервера:")
+        print("-" * 40)
+        
+        server_name = input("Имя сервера: ").strip()
+        if not server_name:
+            print("❌ Ошибка: Имя сервера обязательно!")
+            return
+        
+        # Дополнительная информация (опционально)
+        add_extra = input("Добавить дополнительную информацию? (y/n): ").strip().lower()
+        
+        ip_address = None
+        system_pc = None
+        local_name_pc = None
+        
+        if add_extra == 'y':
+            ip_address = input("IP адрес (Enter для пропуска): ").strip() or None
+            system_pc = input("Система ПК (Enter для пропуска): ").strip() or None
+            local_name_pc = input("Локальное имя ПК (Enter для пропуска): ").strip() or None
+        
+        # Проверяем, существует ли сервер с таким именем
+        existing_server = Server.objects.filter(name=server_name).first()
+        
+        if existing_server:
+            print(f"\n⚠️  Сервер с именем '{server_name}' уже существует!")
+            print(f"   ID: {existing_server.id}")
+            print(f"   UUID: {existing_server.uuid}")
+            print(f"   Создан: {existing_server.created_at}")
+            
+            regenerate = input("\nПерегенерировать API ключ? (y/n): ").strip().lower()
+            
+            if regenerate == 'y':
+                new_api_key = secrets.token_hex(32)
+                existing_server.api_key = new_api_key
+                
+                # Обновляем дополнительную информацию, если указана
+                if ip_address:
+                    existing_server.ip = ip_address
+                if system_pc:
+                    existing_server.SystemPC = system_pc
+                if local_name_pc:
+                    existing_server.Local_Name_PC = local_name_pc
+                
+                existing_server.save()
+                
+                print("\n" + "=" * 50)
+                print("✅ API КЛЮЧ ПЕРЕГЕНЕРИРОВАН!")
+                print("=" * 50)
+                print(f"📌 Сервер: {existing_server.name}")
+                print(f"🆔 Server ID: {existing_server.id}")
+                print(f"🔑 UUID: {existing_server.uuid}")
+                print(f"🔐 API KEY: {new_api_key}")
+                print("=" * 50)
+                print("\n⚠️  ВНИМАНИЕ! Старый API ключ больше не действителен!")
+                print("Сохраните новый ключ в безопасном месте!\n")
+            else:
+                # Показываем существующий ключ
+                print("\n" + "=" * 50)
+                print("📋 ИНФОРМАЦИЯ О СЕРВЕРЕ")
+                print("=" * 50)
+                print(f"📌 Сервер: {existing_server.name}")
+                print(f"🆔 Server ID: {existing_server.id}")
+                print(f"🔑 UUID: {existing_server.uuid}")
+                print(f"🔐 API KEY: {existing_server.api_key}")
+                if existing_server.ip:
+                    print(f"🌐 IP: {existing_server.ip}")
+                if existing_server.SystemPC:
+                    print(f"💻 Система: {existing_server.SystemPC}")
+                if existing_server.Local_Name_PC:
+                    print(f"🏠 Локальное имя: {existing_server.Local_Name_PC}")
+                print(f"📅 Создан: {existing_server.created_at}")
+                print("=" * 50)
+        else:
+            # Создаем новый сервер
+            api_key = secrets.token_hex(32)
+            
+            server = Server.objects.create(
+                name=server_name,
+                api_key=api_key,
+                ip=ip_address,
+                SystemPC=system_pc,
+                Local_Name_PC=local_name_pc
+            )
+            
+            print("\n" + "=" * 50)
+            print("✅ НОВЫЙ СЕРВЕР УСПЕШНО ЗАРЕГИСТРИРОВАН!")
+            print("=" * 50)
+            print(f"📌 Имя сервера: {server.name}")
+            print(f"🆔 Server ID: {server.id}")
+            print(f"🔑 UUID: {server.uuid}")
+            print(f"🔐 API KEY: {api_key}")
+            if ip_address:
+                print(f"🌐 IP: {ip_address}")
+            if system_pc:
+                print(f"💻 Система: {system_pc}")
+            if local_name_pc:
+                print(f"🏠 Локальное имя: {local_name_pc}")
+            print(f"📅 Создан: {server.created_at}")
+            print("=" * 50)
+            print("\n⚠️  СОХРАНИТЕ API КЛЮЧ! Он понадобится для настройки мониторинга.")
+            print("Используйте его в заголовке X-API-Key для запросов к API\n")
+        
+        # Дополнительные опции
+        print("\n📋 ДОПОЛНИТЕЛЬНЫЕ ДЕЙСТВИЯ:")
+        print("1. Показать все серверы")
+        print("2. Удалить сервер")
+        print("3. Вернуться в главное меню")
+        
+        action = input("Выберите действие (1-3): ").strip()
+        
+        if action == '1':
+            show_all_servers()
+        elif action == '2':
+            delete_server(server_name)
+        elif action == '3':
+            return
+        
+    except Exception as e:
+        print(f"\n❌ Ошибка при генерации API токена: {e}")
+        import traceback
+        traceback.print_exc()
+        print("\nУбедитесь, что:")
+        print("1. Django проект настроен правильно")
+        print("2. Модель Server существует в server/models.py")
+        print("3. Выполнены миграции базы данных")
+        print("4. Файл настроек находится в config/settings.py")
+
+def show_all_servers():
+    """Показать все зарегистрированные серверы"""
+    try:
+        init_django()
+        
+        from server.models import Server
+        
+        servers = Server.objects.all().order_by('-created_at')
+        
+        if not servers:
+            print("\n📭 Нет зарегистрированных серверов")
+            return
+        
+        print("\n" + "=" * 60)
+        print("📋 СПИСОК ВСЕХ СЕРВЕРОВ")
+        print("=" * 60)
+        
+        for i, server in enumerate(servers, 1):
+            print(f"\n{i}. 📌 {server.name}")
+            print(f"   🆔 ID: {server.id}")
+            print(f"   🔑 UUID: {server.uuid}")
+            print(f"   🔐 API Key: {server.api_key[:20]}...")
+            if server.ip:
+                print(f"   🌐 IP: {server.ip}")
+            if server.SystemPC:
+                print(f"   💻 Система: {server.SystemPC}")
+            print(f"   📅 Создан: {server.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            print("-" * 40)
+        
+        print(f"\n📊 Всего серверов: {servers.count()}")
+        
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        import traceback
+        traceback.print_exc()
+
+def delete_server(server_name=None):
+    """Удалить сервер"""
+    try:
+        init_django()
+        
+        from server.models import Server
+        
+        if not server_name:
+            server_name = input("Введите имя сервера для удаления: ").strip()
+        
+        if not server_name:
+            print("❌ Имя сервера не указано")
+            return
+        
+        try:
+            server = Server.objects.get(name=server_name)
+            
+            print(f"\n⚠️  ВНИМАНИЕ! Вы собираетесь удалить сервер:")
+            print(f"   📌 Имя: {server.name}")
+            print(f"   🆔 ID: {server.id}")
+            print(f"   🔑 UUID: {server.uuid}")
+            
+            confirm = input(f"\nУдалить сервер '{server_name}'? (yes/no): ").strip().lower()
+            
+            if confirm == 'yes':
+                server.delete()
+                print(f"✅ Сервер '{server_name}' успешно удален!")
+            else:
+                print("❌ Удаление отменено")
+                
+        except Server.DoesNotExist:
+            print(f"❌ Сервер с именем '{server_name}' не найден")
+            
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        import traceback
+        traceback.print_exc()
 
 def run_all():
     """Запуск всех компонентов"""
@@ -115,6 +342,9 @@ def show_menu():
     print("4. Запустить только Django сервер")
     print("5. Запустить миграции + Django сервер")
     print("6. Запустить SSH монитор + Django сервер (без миграций)")
+    print("7. 🔐 Сгенерировать API токен для сервера")
+    print("8. 📋 Показать все серверы")
+    print("9. 🗑️  Удалить сервер")
     print("0. Выход")
     print("=" * 50)
 
@@ -137,9 +367,24 @@ def main():
             run_django_server()
         elif command == 'migrate':
             run_migrations()
+        elif command == 'generate-token':
+            generate_api_token()
+        elif command == 'list-servers':
+            show_all_servers()
+        elif command == 'delete-server':
+            server_name = sys.argv[2] if len(sys.argv) > 2 else None
+            delete_server(server_name)
         else:
             print(f"Неизвестная команда: {command}")
-            print("Доступные команды: all, ssh, django, django-only, migrate")
+            print("Доступные команды:")
+            print("  all              - Запустить все компоненты")
+            print("  ssh              - Запустить SSH монитор")
+            print("  django           - Запустить Django с миграциями")
+            print("  django-only      - Запустить только Django сервер")
+            print("  migrate          - Выполнить миграции")
+            print("  generate-token   - Сгенерировать API токен")
+            print("  list-servers     - Показать все серверы")
+            print("  delete-server    - Удалить сервер")
     else:
         # Интерактивный режим
         while True:
@@ -186,6 +431,19 @@ def main():
                         ssh_process.terminate()
                         django_process.terminate()
                 break
+            
+            elif choice == '7':
+                generate_api_token()
+                # После генерации токена не выходим, показываем меню снова
+                input("\nНажмите Enter для продолжения...")
+            
+            elif choice == '8':
+                show_all_servers()
+                input("\nНажмите Enter для продолжения...")
+            
+            elif choice == '9':
+                delete_server()
+                input("\nНажмите Enter для продолжения...")
             
             elif choice == '0':
                 print("👋 До свидания!")

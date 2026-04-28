@@ -23,7 +23,7 @@ Including another URLconf
 # ]
 
 from django.urls import path
-from server.api import RegisterServerView
+from server.api import *
 from metric.api import ReceiveStatsView, ServerStatListView
 from metric.views import *
 from django.urls import path, include
@@ -40,7 +40,9 @@ urlpatterns = [
     path("api/stats/", ReceiveStatsView.as_view()),
     path("api/stats/list/", ServerStatListView.as_view()),
     path("api/ssh_logs/", RegisterServerView.as_view()),  
-    path("api/server_info/", RegisterServerView.as_view()),  
+    path("api/server_info/", RegisterServerView.as_view()),
+    path('api/get-api-key/', GetAPIKeyView.as_view()),
+    path('api/regenerate-api-key/', RegenerateAPIKeyView.as_view()),
     
     path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
     path('api/', include(router.urls)),

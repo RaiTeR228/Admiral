@@ -3,7 +3,7 @@ import requests
 from tools.Status_system import *
 
 API_URL = "http://127.0.0.1:8000/api/stats/"
-API_KEY = "f03cbdecb1b228b5ab020adad9f3263efbc21c8a2ee0f0c8d381dcf5e360ca95"
+API_KEY = "710ba2edd7b855975aa9da0c0e6e1d37f208d00f3a5c82713b44836e3827dbb7"
 
 def collect_stats():
     cpu = Cpu_Info()
@@ -13,7 +13,7 @@ def collect_stats():
     return {
         "name": "server-1",
         # "server_id": '1',
-        "install_token": "SUPER_SECRET_123",
+        "install_token": "710ba2edd7b855975aa9da0c0e6e1d37f208d00f3a5c82713b44836e3827dbb7",
         "ip": get_local_ip(),
 
         "Use_Ram": ram['used'],
