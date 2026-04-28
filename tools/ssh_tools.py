@@ -1,118 +1,216 @@
-# tools/ssh_tools.py
+#!/usr/bin/env python3
+# type: ignore
 import re
-import time
 import sys
+import time
 import os
+import django
+from datetime import datetime
+from pathlib import Path
 
-# Добавляем пути к проекту
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)  # Admiral/
-config_path = os.path.join(project_root, 'config')  # Admiral/config/
+models_path = Path(__file__).resolve().parent.parent / 'models'
+sys.path.insert(0, str(models_path))
 
-# Добавляем оба пути в sys.path
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-if config_path not in sys.path:
-    sys.path.insert(0, config_path)
-
-# Указываем настройки Django (с учетом двойной вложенности)
+# Указываем настройки Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-try:
-    import django
-    django.setup()
-except ImportError as e:
-    print(f"Ошибка импорта Django: {e}")
-    print(f"Project root: {project_root}")
-    print(f"Config path: {config_path}")
-    print(f"Python path: {sys.path[:3]}")
-    sys.exit(1)
+# Настраиваем Django
+import django
+django.setup()
 
-# Импортируем модель - пробуем разные варианты
-try:
-    # Пробуем прямой импорт
-    from models.sshlog.models import SSHLogEntry
-    print("Импорт через 'from sshlog.models import SSHLogEntry' успешен")
-except ImportError:
+# Теперь импортируем модели (без models., так как мы уже в папке models)
+from sshlog.models import SSHLogEntry
+from server.models import Server
+
+def parse_ssh_log_line(line):
+    """
+    Парсит строку лога SSH и возвращает словарь с данными
+    """
+    # Паттерн для timestamp: 2026-03-27T17:28:10.658373+00:00
+    timestamp_pattern = r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+\+\d{2}:\d{2})'
+    
+    # Паттерн для Accepted/Failed password
+    auth_pattern = r'(Accepted|Failed) password for (\w+) from (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (\d+)'
+    
+    # Паттерн для Connection reset
+    reset_pattern = r'Connection reset by authenticating user (\w+) (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (\d+)'
+    
+    # Паттерн для repeated messages
+    repeated_pattern = r'message repeated (\d+) times: \[ (.*) \]'
+    
+    match = re.search(timestamp_pattern, line)
+    if not match:
+        return None
+    
+    timestamp_str = match.group(1)
+    # Парсим timestamp (обрезаем микросекунды до 6 знаков)
     try:
-        # Пробуем через config
-        from models.sshlog.models import SSHLogEntry
-        print("Импорт через 'from models.sshlog.models import SSHLogEntry' успешен")
-    except ImportError:
-        try:
-            # Пробуем полный путь
-            from models.sshlog.models import SSHLogEntry
-            print("Импорт через 'from models.config.sshlog.models import SSHLogEntry' успешен")
-        except ImportError as e:
-            print(f"Не удалось импортировать модель: {e}")
-            sys.exit(1)
-
-from django.utils import timezone
-
-class SSHMonitor:
-    def __init__(self, log_file='/var/log/auth.log'):
-        self.log_file = log_file
+        # Преобразуем ISO формат с timezone
+        timestamp = datetime.fromisoformat(timestamp_str.replace('+00:00', '+00:00'))
+    except:
+        timestamp = datetime.now()
     
-    def monitor(self):
-        """Запуск мониторинга"""
-        print(f"Начинаю мониторинг {self.log_file}")
+    # Проверяем на повторяющиеся сообщения
+    repeated_match = re.search(repeated_pattern, line)
+    if repeated_match:
+        count = int(repeated_match.group(1))
+        original_message = repeated_match.group(2)
+        # Рекурсивно парсим оригинальное сообщение
+        parsed = parse_ssh_log_line(original_message)
+        if parsed:
+            return {
+                'timestamp': timestamp,
+                'event_type': parsed['event_type'],
+                'username': parsed['username'],
+                'ip_address': parsed['ip_address'],
+                'port': parsed['port'],
+                'raw_log': line,
+                'repeated_count': count
+            }
+        return None
+    
+    # Проверяем на успешный/неудачный вход
+    auth_match = re.search(auth_pattern, line)
+    if auth_match:
+        status = auth_match.group(1)
+        username = auth_match.group(2)
+        ip_address = auth_match.group(3)
+        port = int(auth_match.group(4))
         
-        try:
-            with open(self.log_file, 'r') as f:
-                f.seek(0, 2)
+        event_type = 'success' if status == 'Accepted' else 'failed'
+        
+        return {
+            'timestamp': timestamp,
+            'event_type': event_type,
+            'username': username,
+            'ip_address': ip_address,
+            'port': port,
+            'raw_log': line
+        }
+    
+    # Проверяем на сброс соединения
+    reset_match = re.search(reset_pattern, line)
+    if reset_match:
+        username = reset_match.group(1)
+        ip_address = reset_match.group(2)
+        port = int(reset_match.group(3))
+        
+        return {
+            'timestamp': timestamp,
+            'event_type': 'failed',
+            'username': username,
+            'ip_address': ip_address,
+            'port': port,
+            'raw_log': line
+        }
+    
+    return None
+
+def get_server_uuid():
+    """
+    Получает UUID сервера (первый в БД или создает новый)
+    """
+    server = Server.objects.first()
+    if not server:
+        # Создаем тестовый сервер, если его нет
+        server = Server.objects.create(
+            name='Local Server',
+            api_key='test_key_123',
+            SystemPC='Linux',
+            Local_Name_PC='localhost'
+        )
+        print(f"✅ Создан новый сервер с UUID: {server.uuid}")
+    return str(server.uuid)
+
+def save_ssh_log_entry(parsed_data, server_uuid):
+    """
+    Сохраняет запись в БД
+    """
+    try:
+        # Проверяем, нет ли уже такой записи (чтобы избежать дубликатов)
+        existing = SSHLogEntry.objects.filter(
+            timestamp=parsed_data['timestamp'],
+            username=parsed_data['username'],
+            ip_address=parsed_data['ip_address'],
+            event_type=parsed_data['event_type']
+        ).first()
+        
+        if existing:
+            return False
+        
+        entry = SSHLogEntry.objects.create(
+            UuidServer=server_uuid,
+            event_type=parsed_data['event_type'],
+            username=parsed_data['username'],
+            ip_address=parsed_data['ip_address'],
+            timestamp=parsed_data['timestamp'],
+            raw_log=parsed_data['raw_log']
+        )
+        print(f"💾 Сохранено: {entry}")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка сохранения: {e}")
+        return False
+
+def monitor_ssh_logs(log_file='/var/log/auth.log', follow=True):
+    """
+    Мониторит SSH логи и сохраняет в БД
+    """
+    print(f"🔍 Начинаем мониторинг {log_file}")
+    
+    if not os.path.exists(log_file):
+        print(f"❌ Файл {log_file} не найден!")
+        return
+    
+    server_uuid = get_server_uuid()
+    print(f"🆔 UUID сервера: {server_uuid}")
+    
+    # Для отслеживания позиции в файле
+    file_position = 0
+    
+    # При первом запуске читаем последние 1000 строк
+    with open(log_file, 'r') as f:
+        # Перемещаемся в конец файла
+        f.seek(0, os.SEEK_END)
+        file_position = f.tell()
+        
+        # Если нужно прочитать последние строки
+        if not follow:
+            f.seek(0)
+            lines = f.readlines()
+            for line in lines[-1000:]:  # Последние 1000 строк
+                parsed = parse_ssh_log_line(line)
+                if parsed:
+                    save_ssh_log_entry(parsed, server_uuid)
+    
+    if not follow:
+        return
+    
+    # Режим слежения за файлом
+    print(f"📡 Слежение за логами... (Ctrl+C для остановки)")
+    
+    try:
+        while True:
+            with open(log_file, 'r') as f:
+                f.seek(file_position)
+                new_lines = f.readlines()
+                file_position = f.tell()
                 
-                while True:
-                    line = f.readline()
-                    if line:
-                        self.process_line(line)
-                    else:
-                        time.sleep(0.1)
-        except FileNotFoundError:
-            print(f"Файл {self.log_file} не найден!")
-        except KeyboardInterrupt:
-            print("\nМониторинг остановлен")
-        except Exception as e:
-            print(f"Ошибка: {e}")
-    
-    def process_line(self, line):
-        """Обработка строки лога"""
-        # Успешный вход
-        if 'Accepted' in line and 'ssh' in line:
-            match = re.search(r'for (.*?) from (.*?) port', line)
-            if match:
-                username = match.group(1)
-                ip = match.group(2)
-                try:
-                    SSHLogEntry.objects.create(
-                        event_type='success',
-                        username=username,
-                        ip_address=ip,
-                        raw_log=line.strip(),
-                        timestamp=timezone.now()
-                    )
-                    print(f"✅ Сохранен успешный вход: {username} с {ip}")
-                except Exception as e:
-                    print(f"Ошибка сохранения (success): {e}")
-        
-        # Неуспешный вход
-        elif 'Failed password' in line:
-            match = re.search(r'for (.*?) from (.*?) port', line)
-            if match:
-                username = match.group(1)
-                ip = match.group(2)
-                try:
-                    SSHLogEntry.objects.create(
-                        event_type='failed',
-                        username=username,
-                        ip_address=ip,
-                        raw_log=line.strip(),
-                        timestamp=timezone.now()
-                    )
-                    print(f"❌ Сохранена неудачная попытка: {username} с {ip}")
-                except Exception as e:
-                    print(f"Ошибка сохранения (failed): {e}")
+                for line in new_lines:
+                    # Проверяем строки, связанные с SSH
+                    if 'sshd' in line and ('Accepted' in line or 'Failed' in line or 'Connection reset' in line):
+                        parsed = parse_ssh_log_line(line)
+                        if parsed:
+                            save_ssh_log_entry(parsed, server_uuid)
+                            print(f"📝 {line.strip()}")
+            
+            time.sleep(1)  # Пауза между проверками
+            
+    except KeyboardInterrupt:
+        print("\n👋 Мониторинг остановлен")
 
 if __name__ == '__main__':
     log_file = sys.argv[1] if len(sys.argv) > 1 else '/var/log/auth.log'
-    monitor = SSHMonitor(log_file)
-    monitor.monitor()
+    follow = len(sys.argv) < 3 or sys.argv[2] != '--once'
+    
+    monitor_ssh_logs(log_file, follow)
