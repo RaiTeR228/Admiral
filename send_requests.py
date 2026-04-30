@@ -7,7 +7,7 @@ from tools.Status_system import *
 
 # API_URL = "http://127.0.0.1:8000/api/stats/"
 API_URL = "http://127.0.0.1:8000/api/server_info/" 
-API_KEY = "f62f116a4c29eea1eff6d28cf7a8215acb6e151a3c1954db914fac03505ce1e2"
+API_KEY = "710ba2edd7b855975aa9da0c0e6e1d37f208d00f3a5c82713b44836e3827dbb7"
 # API_KEY = "SUPER_SECRET_123"
 
 
@@ -42,13 +42,13 @@ def collect_stats():
     cpu = Cpu_Info()
     
     return {
-        "name": "server-1",
-        "install_token": "SUPER_SECRET_123",
-        "ip": get_local_ip(),
+        "name": "тест",
+        "INSTALL_TOKEN": API_KEY,
+        # "ip": get_local_ip(),
 
-        "cpu": Status_Server()["cpu"],
+        # "cpu": Status_Server()["cpu"],
         "MAX_CPU_CORES": str(cpu["physical_cores"]),
-        "MAX_CPU_THREADS":  str(cpu["total_cores"]),
+        "MAX_CPU_THREADS":  str(cpu["total_cores"]), 
         "CPU_NAME": get_cpu_name(),  # Используем новую функцию
         "Local_Name_PC": platform.node(),  # Имя компьютера
 
