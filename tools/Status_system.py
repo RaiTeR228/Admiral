@@ -71,7 +71,7 @@ def Ram_Info():
         "available": get_size(ram.available),
         # "used": get_size(ram.used),
         "used": str(ram.used),
-        "percentage": ram.percent
+        "percentage": ram.percent,
 
 # total — общий объём физической памяти в байтах;
 # available — доступный объём памяти;

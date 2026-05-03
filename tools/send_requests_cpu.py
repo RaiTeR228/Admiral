@@ -6,8 +6,8 @@ from cpuinfo import get_cpu_info  # Добавьте эту библиотеку
 from tools.Status_system import *
 
 # API_URL = "http://127.0.0.1:8000/api/stats/"
-API_URL = "http://127.0.0.1:8000/api/server_info/" 
-API_KEY = "710ba2edd7b855975aa9da0c0e6e1d37f208d00f3a5c82713b44836e3827dbb7"
+API_URL = "http://127.0.0.1:8000/api/cpu/"
+API_KEY = "7e55123c9a4d7790185774094b73e44aeaecdd1e5f74bbc3856bed7ec5a9b694"
 # API_KEY = "SUPER_SECRET_123"
 
 
@@ -44,17 +44,9 @@ def collect_stats():
     return {
         "name": "тест",
         "INSTALL_TOKEN": API_KEY,
-        # "ip": get_local_ip(),
-
-        # "cpu": Status_Server()["cpu"],
         "MAX_CPU_CORES": str(cpu["physical_cores"]),
         "MAX_CPU_THREADS":  str(cpu["total_cores"]), 
-        "CPU_NAME": get_cpu_name(),  # Используем новую функцию
-        "Local_Name_PC": platform.node(),  # Имя компьютера
-
-        "MAX_RAM": Ram_Info()["total"],
-
-        "MAX_SWAP": Swap_Info()["total"]
+        "CPU_NAME": get_cpu_name(),
     }
 
 while True:

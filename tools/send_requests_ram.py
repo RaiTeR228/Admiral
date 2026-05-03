@@ -1,22 +1,20 @@
 import time
 import requests
+import psutil
+import platform
 from tools.Status_system import *
 
-API_URL = "http://127.0.0.1:8000/api/stats/"
+API_URL = "http://127.0.0.1:8000/api/ram/"
 API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
 
+
 def collect_stats():
-    cpu = Cpu_Info()
     ram = Ram_Info()
-    swap= Swap_Info()
-    cpu_name = System_Info()
     return {
         "name": "тест",
-        "install_token": "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe",
-
-        "Use_Ram": ram['used'],
-        "Use_Cpu":cpu['total_cpu_usage'],
-        "Use_Swap": swap['used']
+        "INSTALL_TOKEN": API_KEY,
+        "MAX_RAM": Ram_Info()["total"],
+        "RAM_CHARACTERISTICS": Ram_Info()["total"],
     }
 
 while True:

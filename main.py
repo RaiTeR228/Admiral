@@ -98,16 +98,17 @@ def generate_api_token():
             return
         
         # Дополнительная информация (опционально)
-        add_extra = input("Добавить дополнительную информацию? (y/n): ").strip().lower()
+        # add_extra = input("Добавить дополнительную информацию? (y/n): ").strip().lower()
         
-        ip_address = None
-        system_pc = None
-        local_name_pc = None
-        
-        if add_extra == 'y':
-            ip_address = input("IP адрес (Enter для пропуска): ").strip() or None
-            system_pc = input("Система ПК (Enter для пропуска): ").strip() or None
-            local_name_pc = input("Локальное имя ПК (Enter для пропуска): ").strip() or None
+        import psutil
+        import platform
+        import socket
+        hostname = socket.gethostname()
+        ip_address =  socket.gethostbyname(hostname)
+        system_pc = platform.system()
+        local_name_pc = platform.node()
+
+
         
         # Проверяем, существует ли сервер с таким именем
         existing_server = Server.objects.filter(name=server_name).first()
@@ -141,6 +142,9 @@ def generate_api_token():
                 print(f"🆔 Server ID: {existing_server.id}")
                 print(f"🔑 UUID: {existing_server.uuid}")
                 print(f"🔐 API KEY: {new_api_key}")
+                print(f"🌐 IP: {existing_server.ip}")
+                print(f"💻 Система: {existing_server.SystemPC}")
+                print(f"🏠 Локальное имя: {existing_server.Local_Name_PC}")
                 print("=" * 50)
                 print("\n⚠️  ВНИМАНИЕ! Старый API ключ больше не действителен!")
                 print("Сохраните новый ключ в безопасном месте!\n")
@@ -454,3 +458,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

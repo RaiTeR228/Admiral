@@ -1,10 +1,10 @@
 # apps/cpu/api.py
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.core.exceptions import ObjectDoesNotExist
 from .models import Cpu
-from servers.models import Server  # Импортируем Server из другого приложения
+from server.models import Server 
 
 class CPUMetricsView(APIView):
     """API для приема и сохранения данных о CPU"""
@@ -37,9 +37,9 @@ class CPUMetricsView(APIView):
                 'MAX_CPU_CORES': request.data.get("MAX_CPU_CORES"),
                 'MAX_CPU_THREADS': request.data.get("MAX_CPU_THREADS"),
                 'CPU_NAME': request.data.get("CPU_NAME"),
-                'Local_Name_PC': request.data.get("Local_Name_PC", server.Local_Name_PC),
-                'MAX_RAM': request.data.get("MAX_RAM"),
-                'MAX_SWAP': request.data.get("MAX_SWAP"),
+                # 'Local_Name_PC': request.data.get("Local_Name_PC", server.Local_Name_PC),
+                # 'MAX_RAM': request.data.get("MAX_RAM"),
+                # 'MAX_SWAP': request.data.get("MAX_SWAP"),
             }
             
             # 4. Сохраняем или обновляем данные CPU

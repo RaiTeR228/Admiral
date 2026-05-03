@@ -24,8 +24,11 @@ Including another URLconf
 
 from django.urls import path
 from server.api import *
+from cpu.api import CPUMetricsView
 from metric.api import ReceiveStatsView, ServerStatListView
 from metric.views import *
+from sshlog.views import SSHLogViewSet
+from ram.api import RamMetricsView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 # from . import views
@@ -39,6 +42,8 @@ urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),
     path("api/stats/", ReceiveStatsView.as_view()),
     path("api/stats/list/", ServerStatListView.as_view()),
+    path("api/cpu/", CPUMetricsView.as_view()),
+    path("api/ram/", RamMetricsView.as_view()),
     path("api/ssh_logs/", RegisterServerView.as_view()),  
     path("api/server_info/", RegisterServerView.as_view()),
     path('api/get-api-key/', GetAPIKeyView.as_view()),
