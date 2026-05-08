@@ -6,10 +6,6 @@ import socket
 # from tabulate import tabulate
 import cpuinfo
 
-
-
-
-
 def get_size(bytes, suffix="B"):
     """
     Scale bytes to its proper format
@@ -114,8 +110,8 @@ def Disk_Info():
     print(f"Total read: {get_size(disk_io.read_bytes)}")
     print(f"Total write: {get_size(disk_io.write_bytes)}")
     
-    return {"Device": partitions.device, "Mountpoint": partitions.mountpoint, "File system type": partitions.fstype, "Total Size": get_size(partition_usage.total), "Used": get_size(partition_usage.used), "Free": get_size(partition_usage.free), "Percentage": partition_usage.percent}
-
+    # return {"Device": partitions.device, "Mountpoint": partitions.mountpoint, "File system type": partitions.fstype, "Total Size": get_size(partition_usage.total), "Used": get_size(partition_usage.used), "Free": get_size(partition_usage.free), "Percentage": partition_usage.percent}
+# Disk_Info()
 # # Network information
 
 # get all network interfaces (virtual and physical)

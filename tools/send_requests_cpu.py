@@ -3,14 +3,12 @@ import requests
 import psutil
 import platform
 from cpuinfo import get_cpu_info  # Добавьте эту библиотеку
-from tools.Status_system import *
+from Status_system import *
 
 # API_URL = "http://127.0.0.1:8000/api/stats/"
 API_URL = "http://127.0.0.1:8000/api/cpu/"
-API_KEY = "7e55123c9a4d7790185774094b73e44aeaecdd1e5f74bbc3856bed7ec5a9b694"
-# API_KEY = "SUPER_SECRET_123"
-
-
+API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
+NAME_SERVER = "тест"
 
 def get_cpu_name():
     """Получение названия процессора"""
@@ -42,7 +40,7 @@ def collect_stats():
     cpu = Cpu_Info()
     
     return {
-        "name": "тест",
+        "name": NAME_SERVER,
         "INSTALL_TOKEN": API_KEY,
         "MAX_CPU_CORES": str(cpu["physical_cores"]),
         "MAX_CPU_THREADS":  str(cpu["total_cores"]), 

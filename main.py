@@ -3,7 +3,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
-from tools.upgrade_packed import run_apt_update
+# from tools.upgrade_packed import run_apt_update
 
 # Определяем пути
 project_root = Path(__file__).parent
@@ -350,6 +350,7 @@ def show_menu():
     print("7. 🔐 Сгенерировать API токен для сервера")
     print("8. 📋 Показать все серверы")
     print("9. 🗑️  Удалить сервер")
+    print("10. 🚀 Запустить кастомную функцию (run)")
     print("0. Выход")
     print("=" * 50)
 
@@ -379,6 +380,9 @@ def main():
         elif command == 'delete-server':
             server_name = sys.argv[2] if len(sys.argv) > 2 else None
             delete_server(server_name)
+        elif command == 'run':
+            # Новый режим: запуск castm_function
+            castm_function()
         else:
             print(f"Неизвестная команда: {command}")
             print("Доступные команды:")
@@ -390,6 +394,7 @@ def main():
             print("  generate-token   - Сгенерировать API токен")
             print("  list-servers     - Показать все серверы")
             print("  delete-server    - Удалить сервер")
+            print("  run              - Запустить кастомную функцию с Django сервером")
     else:
         # Интерактивный режим
         while True:
@@ -450,18 +455,117 @@ def main():
                 delete_server()
                 input("\nНажмите Enter для продолжения...")
             
+            elif choice == '10':
+                print("🚀 Запуск кастомной функции...")
+                castm_function()
+                break
+            
             elif choice == '0':
                 print("👋 До свидания!")
                 break
+
+            elif command == 'run':
+                # Новый режим: запуск castm_function
+                castm_function()
             
             else:
                 print("❌ Неверный выбор! Попробуйте снова.")
 
 
 def castm_function():
-    run_apt_update()
+    processes = []
+
+    print("\nВыполнение миграций...")
+    run_migrations()
+    
+    print("\nЗапуск Django сервера...")
+    django_process = run_django_server()
+    if django_process:
+        processes.append(('Django Server', django_process))
+        print("Django сервер запущен")
+        import time
+        time.sleep(5)
+    else:
+        print("Не удалось запустить Django сервер")
+        return
+    
+    try:
+        
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "send_request_disk", 
+            tools_path / 'send_request_disk.py'
+        )
+        
+        if spec and spec.loader:
+            disk_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(disk_module)
+            
+            # Вызываем функцию
+            disk_module.disk_stats()
+            print("✅ Данные дисков отправлены")
+        else:
+            print("⚠️  Файл send_request_disk.py не найден")
+            
+    except Exception as e:
+        print(f"⚠️  Ошибка при отправке данных дисков: {e}")
+    
+    ssh_process = run_ssh_monitor()
+    if ssh_process:
+        processes.append(('SSH Monitor', ssh_process))
+        print("SSH монитор запущен")
+    if not ssh_process:
+        print("Не удалось запустить SSH монитор")
+    
+    send_req_cpu = tools_path / 'send_request_cpu.py'
+    if send_req_cpu.exists():
+        try:
+            cpu_process = subprocess.Popen([sys.executable, send_req_cpu])
+            processes.append(('CPU Monitor', cpu_process))
+            print("CPU монитор запущен")
+        except Exception as e:
+            print(f"⚠️  Ошибка при запуске CPU монитора: {e}")
+    
+    send_req_ram = tools_path / 'send_request_ram.py'
+    if send_req_ram.exists():
+        try:
+            ram_process = subprocess.Popen([sys.executable, send_req_ram])
+            processes.append(('RAM Monitor', ram_process))
+            print("RAM монитор запущен")
+        except Exception as e:
+            print(f"⚠️  Ошибка при запуске RAM монитора: {e}")
+
+    # send_req_disk = tools_path / 'send_request_disk.py'
+    # if send_req_disk.exists():
+    #     try:
+    #         disk_process = subprocess.Popen([sys.executable, send_req_disk])
+    #         processes.append(('Disk Monitor', disk_process))
+    #         print("Disk монитор запущен")
+    #     except Exception as e:
+    #         print(f"⚠️  Ошибка при запуске Disk монитора: {e}")
+    
+ 
+    
+    if not processes:
+        print("Не удалось запустить ни один сервис")
+        return
+    
+    print(f"\nЗапущено {len(processes)} сервисов")
+    
+    try:
+        for name, process in processes:
+            process.wait()
+    except KeyboardInterrupt:
+        print("\nОстановка всех сервисов...")
+        for name, process in processes:
+            print(f"Останавливаем {name}...")
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+        print("Все сервисы остановлены")
 
 if __name__ == '__main__':
-    castm_function()
     main()
     

@@ -112,18 +112,12 @@ class ServerModelTest(TestCase):
         self.assertEqual(server2.name, short_name)
         
         # Django не выбрасывает исключение при длине > max_length на уровне модели
-        # Вместо этого БД может обрезать строку или выбросить ошибку
-        # Проверяем, что при попытке сохранить слишком длинное имя,
-        # либо выбрасывается исключение, либо строка обрезается
+        # Проверяем слишком длинное имя
         too_long_name = 'A' * 300
         
-        try:
-            server3 = Server.objects.create(name=too_long_name, api_key='key3')
-            # Если исключение не выброшено, проверяем что строка была обрезана
-            self.assertLessEqual(len(server3.name), 255)
-        except (DataError, IntegrityError):
-            # Исключение выброшено - это тоже приемлемо
-            pass
+        server = Server(name=too_long_name, api_key='key3')
+        with self.assertRaises(ValidationError):
+            server.full_clean()
     
     def test_api_key_max_length(self):
         """Тест максимальной длины поля api_key"""
@@ -141,13 +135,9 @@ class ServerModelTest(TestCase):
         # Проверяем слишком длинный ключ
         too_long_key = 'C' * 300
         
-        try:
-            server3 = Server.objects.create(name='Test3', api_key=too_long_key)
-            # Если исключение не выброшено, проверяем обрезание
-            self.assertLessEqual(len(server3.api_key), 255)
-        except (DataError, IntegrityError):
-            # Исключение выброшено - приемлемо
-            pass
+        server = Server(name='Test3', api_key=too_long_key)
+        with self.assertRaises(ValidationError):
+            server.full_clean()
     
     def test_name_max_length_validation(self):
         """Тест валидации максимальной длины name через full_clean"""

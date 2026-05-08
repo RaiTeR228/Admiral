@@ -4,6 +4,8 @@ from tools.Status_system import *
 
 API_URL = "http://127.0.0.1:8000/api/stats/"
 API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
+NAME_SERVER = "тест"
+
 
 def collect_stats():
     cpu = Cpu_Info()
@@ -11,8 +13,8 @@ def collect_stats():
     swap= Swap_Info()
     cpu_name = System_Info()
     return {
-        "name": "тест",
-        "install_token": "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe",
+        "name": NAME_SERVER,
+        "install_token": API_KEY,
 
         "Use_Ram": ram['used'],
         "Use_Cpu":cpu['total_cpu_usage'],

@@ -2,16 +2,16 @@ import time
 import requests
 import psutil
 import platform
-from tools.Status_system import *
+from Status_system import *
 
 API_URL = "http://127.0.0.1:8000/api/ram/"
 API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
-
+NAME_SERVER = "тест"
 
 def collect_stats():
     ram = Ram_Info()
     return {
-        "name": "тест",
+        "name": NAME_SERVER,
         "INSTALL_TOKEN": API_KEY,
         "MAX_RAM": Ram_Info()["total"],
         "RAM_CHARACTERISTICS": Ram_Info()["total"],
