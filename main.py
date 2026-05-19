@@ -473,90 +473,67 @@ def main():
 
 
 def castm_function():
+    """Запуск всех компонентов мониторинга как отдельных процессов"""
+    import time
+    
     processes = []
 
     print("\nВыполнение миграций...")
     run_migrations()
     
-    print("\nЗапуск Django сервера...")
+
+    print("\nапуск Django сервера...")
     django_process = run_django_server()
+    
     if django_process:
         processes.append(('Django Server', django_process))
         print("Django сервер запущен")
-        import time
-        time.sleep(5)
+        print("Ожидание запуска Django сервера (10 секунд)...")
+        time.sleep(10)
     else:
         print("Не удалось запустить Django сервер")
         return
-    
-    try:
-        
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "send_request_disk", 
-            tools_path / 'send_request_disk.py'
-        )
-        
-        if spec and spec.loader:
-            disk_module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(disk_module)
-            
-            # Вызываем функцию
-            disk_module.disk_stats()
-            print("✅ Данные дисков отправлены")
-        else:
-            print("⚠️  Файл send_request_disk.py не найден")
-            
-    except Exception as e:
-        print(f"⚠️  Ошибка при отправке данных дисков: {e}")
     
     ssh_process = run_ssh_monitor()
     if ssh_process:
         processes.append(('SSH Monitor', ssh_process))
         print("SSH монитор запущен")
-    if not ssh_process:
-        print("Не удалось запустить SSH монитор")
-    
-    send_req_cpu = tools_path / 'send_request_cpu.py'
-    if send_req_cpu.exists():
-        try:
-            cpu_process = subprocess.Popen([sys.executable, send_req_cpu])
-            processes.append(('CPU Monitor', cpu_process))
-            print("CPU монитор запущен")
-        except Exception as e:
-            print(f"⚠️  Ошибка при запуске CPU монитора: {e}")
-    
-    send_req_ram = tools_path / 'send_request_ram.py'
-    if send_req_ram.exists():
-        try:
-            ram_process = subprocess.Popen([sys.executable, send_req_ram])
-            processes.append(('RAM Monitor', ram_process))
-            print("RAM монитор запущен")
-        except Exception as e:
-            print(f"⚠️  Ошибка при запуске RAM монитора: {e}")
 
-    # send_req_disk = tools_path / 'send_request_disk.py'
-    # if send_req_disk.exists():
-    #     try:
-    #         disk_process = subprocess.Popen([sys.executable, send_req_disk])
-    #         processes.append(('Disk Monitor', disk_process))
-    #         print("Disk монитор запущен")
-    #     except Exception as e:
-    #         print(f"⚠️  Ошибка при запуске Disk монитора: {e}")
+    print("\n📊 Шаг 4: Запуск сборщиков метрик...")
+
+    scripts_to_run = [
+        ('send_request_cpu.py', 'CPU Monitor'),
+        ('send_request_ram.py', 'RAM Monitor'),
+        ('send_request_disk.py', 'Disk Monitor'),
+        # ('send_request_gpu.py', 'GPU Monitor'),
+        ('send_request_metric.py', 'Metric Monitor'),
+    ]
     
- 
+    for script_name, monitor_name in scripts_to_run:
+        script_path = tools_path / script_name
+        if script_path.exists():
+            try:
+                # Запускаем с небольшой задержкой между запусками
+                time.sleep(2)
+                process = subprocess.Popen([sys.executable, str(script_path)])
+                processes.append((monitor_name, process))
+                print(f"{monitor_name} запущен")
+            except Exception as e:
+                print(f"Ошибка запуска {monitor_name}: {e}")
+        else:
+            print(f"Файл {script_name} не найден, пропускаем")
     
-    if not processes:
-        print("Не удалось запустить ни один сервис")
+    if len(processes) <= 1:  # Только Django сервер
+        print(" Не удалось запустить ни один мониторинг")
         return
     
-    print(f"\nЗапущено {len(processes)} сервисов")
+    print(f"Запущено {len(processes)} сервисов")
     
     try:
         for name, process in processes:
             process.wait()
     except KeyboardInterrupt:
-        print("\nОстановка всех сервисов...")
+        print("\n🛑 Остановка всех сервисов...")
         for name, process in processes:
             print(f"Останавливаем {name}...")
             process.terminate()
@@ -564,7 +541,7 @@ def castm_function():
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 process.kill()
-        print("Все сервисы остановлены")
+        print("✅ Все сервисы остановлены")
 
 if __name__ == '__main__':
     main()
