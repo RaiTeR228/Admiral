@@ -3,4 +3,4 @@ WORKDIR /app
 COPY req.txt .
 RUN pip3 install -r req.txt
 COPY . .
-CMD [ "python","main.py" ]
+CMD [ "python","main.py", "run" ]
