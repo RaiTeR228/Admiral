@@ -103,20 +103,20 @@ def parse_ssh_log_line(line):
     
     return None
 
-# def get_server_uuid():
-#     """
-#     Получает UUID сервера (первый в БД или создает новый)
-#     """
-#     server = Server.objects.first()
-#     if not server:
-#         server = Server.objects.create(
-#             name='Local Server',
-#             api_key='test_key_123',
-#             SystemPC='Linux',
-#             Local_Name_PC='localhost'
-#         )
-#         print(f"Создан новый сервер с UUID: {server.uuid}")
-#     return str(server.uuid)
+def get_server_uuid():
+    """
+    Получает UUID сервера (первый в БД или создает новый)
+    """
+    server = Server.objects.first()
+    if not server:
+        server = Server.objects.create(
+            name='Local Server',
+            api_key='test_key_123',
+            SystemPC='Linux',
+            Local_Name_PC='localhost'
+        )
+        print(f"Создан новый сервер с UUID: {server.uuid}")
+    return str(server.uuid)
 
 def save_ssh_log_entry(parsed_data, server_uuid):
     """

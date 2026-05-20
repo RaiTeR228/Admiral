@@ -503,9 +503,9 @@ def castm_function():
     scripts_to_run = [
         ('send_requests_cpu.py', 'CPU Monitor'),
         ('send_requests_ram.py', 'RAM Monitor'),
-        ('send_request_disk.py', 'Disk Monitor'),
+        ('send_requests_disk.py', 'Disk Monitor'),
         # ('send_request_gpu.py', 'GPU Monitor'),
-        ('send_request_server.py', 'Metric Monitor'),
+        ('send_statistic_server.py', 'Metric Monitor'),
     ]
     
     for script_name, monitor_name in scripts_to_run:
@@ -532,7 +532,7 @@ def castm_function():
         for name, process in processes:
             process.wait()
     except KeyboardInterrupt:
-        print("\n🛑 Остановка всех сервисов...")
+        print("\n--Остановка всех сервисов...")
         for name, process in processes:
             print(f"Останавливаем {name}...")
             process.terminate()
@@ -540,7 +540,7 @@ def castm_function():
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 process.kill()
-        print("✅ Все сервисы остановлены")
+        print("Все сервисы остановлены")
 
 if __name__ == '__main__':
     main()
