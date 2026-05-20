@@ -24,7 +24,7 @@ Including another URLconf
 
 from django.urls import path
 from server.api import *
-from cpu.api import CPUMetricsView
+from cpu.api import CPUMetricsView, CPUListView, CPUSpecificView
 from metric.api import ReceiveStatsView, ServerStatListView
 from metric.views import *
 from sshlog.views import SSHLogViewSet
@@ -41,15 +41,21 @@ router.register(r'ssh-logs', views.SSHLogViewSet, basename='ssh-log')
 
 urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),
+
     path("api/stats/", ReceiveStatsView.as_view()),
     path("api/stats/list/", ServerStatListView.as_view()),
-    path("api/cpu/", CPUMetricsView.as_view()),
+    path("api/server_info/", RegisterServerView.as_view()),
+    
     path("api/ram/", RamMetricsView.as_view()),
     path("api/disk/", DiskMetricsView.as_view()),
     path("api/ssh_logs/", RegisterServerView.as_view()),  
-    path("api/server_info/", RegisterServerView.as_view()),
+    
     path('api/get-api-key/', GetAPIKeyView.as_view()),
     path('api/regenerate-api-key/', RegenerateAPIKeyView.as_view()),
+
+    path("api/cpu/", CPUMetricsView.as_view()),
+    path('api/cpu/get-cpu/', CPUListView.as_view(), name='get-cpu'),
+    path('api/cpu/server/<str:server_uuid>/', CPUSpecificView.as_view(), name='cpu-specific'),
     
     path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
     path('api/', include(router.urls)),

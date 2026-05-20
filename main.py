@@ -482,14 +482,13 @@ def castm_function():
     run_migrations()
     
 
-    print("\nапуск Django сервера...")
+    print("\n запуск Django сервера...")
     django_process = run_django_server()
     
     if django_process:
         processes.append(('Django Server', django_process))
         print("Django сервер запущен")
-        print("Ожидание запуска Django сервера (10 секунд)...")
-        time.sleep(10)
+        # time.sleep(10)
     else:
         print("Не удалось запустить Django сервер")
         return
@@ -502,11 +501,11 @@ def castm_function():
     print("\n📊 Шаг 4: Запуск сборщиков метрик...")
 
     scripts_to_run = [
-        ('send_request_cpu.py', 'CPU Monitor'),
-        ('send_request_ram.py', 'RAM Monitor'),
+        ('send_requests_cpu.py', 'CPU Monitor'),
+        ('send_requests_ram.py', 'RAM Monitor'),
         ('send_request_disk.py', 'Disk Monitor'),
         # ('send_request_gpu.py', 'GPU Monitor'),
-        ('send_request_metric.py', 'Metric Monitor'),
+        ('send_request_server.py', 'Metric Monitor'),
     ]
     
     for script_name, monitor_name in scripts_to_run:

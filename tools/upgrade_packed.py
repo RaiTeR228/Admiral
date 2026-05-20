@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+
+if sys.platform == "win32":
+    sys.exit(1) 
+
 import subprocess
 import logging
 from datetime import datetime

@@ -4,7 +4,7 @@ import psutil
 import platform
 
 API_URL = "http://127.0.0.1:8000/api/disk/"
-API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
+API_KEY = "53076c29a60f29c76d7bd74cbe10a15c837bb3f7c7ba921d071c6cb5eeb96ce3"
 NAME_SERVER = "тест"
 
 def disk_stats():
@@ -15,10 +15,9 @@ def disk_stats():
         try:
             partition_usage = psutil.disk_usage(partition.mountpoint)
             
-            # Формируем данные в нужном серверу формате
             disk_data = {
-                "DISK_NAME": partition.device,  # или partition.mountpoint
-                "MAX_SWAP": psutil.swap_memory().total,  # если не собираете - отправьте 0
+                "DISK_NAME": partition.device,
+                "MAX_SWAP": psutil.swap_memory().total,
                 "MAX_DISK": partition_usage.total,
                 "Free_DISK": partition_usage.free
             }

@@ -12,5 +12,4 @@ class ServerStat(models.Model):
     Use_Swap = models.IntegerField(help_text="SWAP",null=True, blank=True)
     IO = models.FloatField(help_text="Input/Output(%)", null=True, blank=True)
 
-    # Cpu_Info = models.IntegerField(help_text="Total CPU Cores", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

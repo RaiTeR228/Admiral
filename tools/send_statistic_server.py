@@ -1,9 +1,9 @@
 import time
 import requests
-from tools.Status_system import *
+from Status_system import *
 
 API_URL = "http://127.0.0.1:8000/api/stats/"
-API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
+API_KEY = "53076c29a60f29c76d7bd74cbe10a15c837bb3f7c7ba921d071c6cb5eeb96ce3"
 NAME_SERVER = "тест"
 
 

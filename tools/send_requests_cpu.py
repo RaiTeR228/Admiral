@@ -1,19 +1,18 @@
+#send_requests_cpu.py
 import time
 import requests
 import psutil
 import platform
-from cpuinfo import get_cpu_info  # Добавьте эту библиотеку
+from cpuinfo import get_cpu_info
 from Status_system import *
 
-# API_URL = "http://127.0.0.1:8000/api/stats/"
 API_URL = "http://127.0.0.1:8000/api/cpu/"
-API_KEY = "7c2d24de67d2dfb3bb8f2984ce15e374400025f659c133a66c70565eade366fe"
-NAME_SERVER = "тест"
+API_KEY = "53076c29a60f29c76d7bd74cbe10a15c837bb3f7c7ba921d071c6cb5eeb96ce3"
+NAME_SERVER = "zcx"
 
 def get_cpu_name():
     """Получение названия процессора"""
     try:
-        # Способ 1: через cpuinfo библиотеку
         cpu_info = get_cpu_info()
         brand_raw = cpu_info.get('brand_raw', '')
         if brand_raw:
@@ -22,7 +21,6 @@ def get_cpu_name():
         pass
     
     try:
-        # Способ 2: через platform модуль
         processor = platform.processor()
         if processor:
             return processor
@@ -30,8 +28,6 @@ def get_cpu_name():
         pass
     
     try:
-        # Способ 3: через psutil (не всегда работает)
-        # Некоторые системы хранят инфу о процессоре здесь
         return "Unknown CPU"
     except:
         return "Unknown CPU"
@@ -49,7 +45,7 @@ def collect_stats():
 
 while True:
     data = collect_stats()
-    print("Отправляем:", data)  # Посмотрите, что отправляется
+    print("Отправляем:", data)
     
     try:
         response = requests.post(
