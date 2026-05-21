@@ -25,7 +25,7 @@ class RegisterServerView(APIView):
     def post(self, request):
         try:
             # 1. Проверка install_token
-            install_token = request.data.get("install_token")
+            install_token = request.data.get("INSTALL_TOKEN")
             if not install_token:
                 return Response({
                     "error": "install_token is required",
@@ -147,7 +147,7 @@ class GetAPIKeyView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        install_token = request.data.get("install_token")
+        install_token = request.data.get("INSTALL_TOKEN")
         server_name = request.data.get("name")
         
         if not install_token or not server_name:
@@ -180,7 +180,7 @@ class RegenerateAPIKeyView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        install_token = request.data.get("install_token")
+        install_token = request.data.get("INSTALL_TOKEN")
         server_name = request.data.get("name")
         
         if not install_token or not server_name:

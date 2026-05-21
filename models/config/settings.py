@@ -17,7 +17,9 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-INSTALL_TOKEN = os.getenv('INSTALL_TOKEN', secrets.token_hex(32))
+# INSTALL_TOKEN = os.getenv('INSTALL_TOKEN', secrets.token_hex(32))
+# print(f"=== INSTALL_TOKEN = {INSTALL_TOKEN} ===")
+INSTALL_TOKEN = "123"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

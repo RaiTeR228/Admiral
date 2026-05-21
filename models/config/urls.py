@@ -29,6 +29,7 @@ from metric.api import ReceiveStatsView, ServerStatListView
 from metric.views import *
 from sshlog.views import SSHLogViewSet
 from ram.api import RamMetricsView
+from gpu.api import GPUMetricsView, GPUListView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from disk.api import DiskMetricsView
@@ -42,16 +43,19 @@ router.register(r'ssh-logs', views.SSHLogViewSet, basename='ssh-log')
 urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),
 
-    path("api/stats/", ReceiveStatsView.as_view()),
-    path("api/stats/list/", ServerStatListView.as_view()),
-    path("api/server_info/", RegisterServerView.as_view()),
+    path("api/post-stats/", ReceiveStatsView.as_view()),
+    path("api/get-stats-list/", ServerStatListView.as_view()),
+    # path("api/server_info/", RegisterServerView.as_view()),
     
     path("api/ram/", RamMetricsView.as_view()),
     path("api/disk/", DiskMetricsView.as_view()),
-    path("api/ssh_logs/", RegisterServerView.as_view()),  
+    # path("api/ssh_logs/", RegisterServerView.as_view()),  
     
     path('api/get-api-key/', GetAPIKeyView.as_view()),
     path('api/regenerate-api-key/', RegenerateAPIKeyView.as_view()),
+
+    path("api/post-gpu/", GPUMetricsView.as_view()),
+    path("api/get-gpu/", GPUListView.as_view()),
 
     path("api/cpu/", CPUMetricsView.as_view()),
     path('api/cpu/get-cpu/', CPUListView.as_view(), name='get-cpu'),

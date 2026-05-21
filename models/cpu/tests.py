@@ -1,43 +1,49 @@
-# cpu/tests.py
-from django.test import TestCase
+import pytest
 from django.core.exceptions import ValidationError
-from .models import Cpu
 
+pytestmark = pytest.mark.django_db
 
-class CpuModelTest(TestCase):
+class TestCpuModel:
     """Базовые тесты модели Cpu"""
     
-    def setUp(self):
-        """Подготовка данных перед каждым тестом"""
-        self.cpu_data = {
+    @pytest.fixture
+    def cpu_data(self):
+        """Фикстура с данными для создания CPU"""
+        return {
             'UuidServer': 'test-uuid-12345',
             'MAX_CPU_CORES': '8',
             'MAX_CPU_THREADS': '16',
             'CPU_NAME': 'Intel Core i7-9700K'
         }
     
-    def test_create_cpu_with_all_fields(self):
+    def test_create_cpu_with_all_fields(self, cpu_data):
         """Тест создания CPU с полной информацией"""
-        cpu = Cpu.objects.create(**self.cpu_data)
+        from cpu.models import Cpu
         
-        self.assertIsNotNone(cpu.id)
-        self.assertEqual(cpu.UuidServer, 'test-uuid-12345')
-        self.assertEqual(cpu.MAX_CPU_CORES, '8')
-        self.assertEqual(cpu.MAX_CPU_THREADS, '16')
-        self.assertEqual(cpu.CPU_NAME, 'Intel Core i7-9700K')
+        cpu = Cpu.objects.create(**cpu_data)
+        
+        assert cpu.id is not None
+        assert cpu.UuidServer == 'test-uuid-12345'
+        assert cpu.MAX_CPU_CORES == '8'
+        assert cpu.MAX_CPU_THREADS == '16'
+        assert cpu.CPU_NAME == 'Intel Core i7-9700K'
     
     def test_create_cpu_minimal(self):
         """Тест создания CPU только с обязательным полем"""
+        from cpu.models import Cpu
+        
         cpu = Cpu.objects.create(UuidServer='uuid-123')
         
-        self.assertIsNotNone(cpu.id)
-        self.assertEqual(cpu.UuidServer, 'uuid-123')
-        self.assertIsNone(cpu.MAX_CPU_CORES)
-        self.assertIsNone(cpu.MAX_CPU_THREADS)
-        self.assertIsNone(cpu.CPU_NAME)
+        assert cpu.id is not None
+        assert cpu.UuidServer == 'uuid-123'
+        assert cpu.MAX_CPU_CORES is None
+        assert cpu.MAX_CPU_THREADS is None
+        assert cpu.CPU_NAME is None
     
     def test_update_cpu(self):
         """Тест обновления CPU"""
+        from cpu.models import Cpu
+        
         cpu = Cpu.objects.create(UuidServer='uuid-789')
         
         cpu.MAX_CPU_CORES = '16'
@@ -46,52 +52,89 @@ class CpuModelTest(TestCase):
         cpu.save()
         
         updated_cpu = Cpu.objects.get(id=cpu.id)
-        self.assertEqual(updated_cpu.MAX_CPU_CORES, '16')
-        self.assertEqual(updated_cpu.MAX_CPU_THREADS, '32')
-        self.assertEqual(updated_cpu.CPU_NAME, 'AMD Ryzen 9')
+        assert updated_cpu.MAX_CPU_CORES == '16'
+        assert updated_cpu.MAX_CPU_THREADS == '32'
+        assert updated_cpu.CPU_NAME == 'AMD Ryzen 9'
     
     def test_delete_cpu(self):
         """Тест удаления CPU"""
+        from cpu.models import Cpu
+        
         cpu = Cpu.objects.create(UuidServer='uuid-delete')
         cpu_id = cpu.id
         
         cpu.delete()
-        self.assertFalse(Cpu.objects.filter(id=cpu_id).exists())
+        assert not Cpu.objects.filter(id=cpu_id).exists()
 
 
-class CpuFilterTest(TestCase):
+class TestCpuFilter:
     """Тесты фильтрации CPU"""
     
-    def setUp(self):
-        """Создание тестовых данных"""
-        self.cpu1 = Cpu.objects.create(
+    @pytest.fixture
+    def test_cpus(self):
+        """Фикстура с тестовыми данными CPU"""
+        from cpu.models import Cpu
+        
+        cpu1 = Cpu.objects.create(
             UuidServer='uuid-1',
             MAX_CPU_CORES='8',
             CPU_NAME='Intel i7'
         )
-        self.cpu2 = Cpu.objects.create(
+        cpu2 = Cpu.objects.create(
             UuidServer='uuid-2',
             MAX_CPU_CORES='16',
             CPU_NAME='AMD Ryzen'
         )
-        self.cpu3 = Cpu.objects.create(
+        cpu3 = Cpu.objects.create(
             UuidServer='uuid-1',
             MAX_CPU_CORES='4',
             CPU_NAME='Intel i5'
         )
+        return [cpu1, cpu2, cpu3]
     
-    def test_filter_by_uuid_server(self):
+    def test_filter_by_uuid_server(self, test_cpus):
         """Тест фильтрации по UuidServer"""
+        from cpu.models import Cpu
+        
         cpus = Cpu.objects.filter(UuidServer='uuid-1')
-        self.assertEqual(cpus.count(), 2)
+        assert cpus.count() == 2
     
-    def test_filter_by_cpu_name(self):
+    def test_filter_by_cpu_name(self, test_cpus):
         """Тест фильтрации по названию CPU"""
+        from cpu.models import Cpu
+        
         cpus = Cpu.objects.filter(CPU_NAME='Intel i7')
-        self.assertEqual(cpus.count(), 1)
-        self.assertEqual(cpus.first().MAX_CPU_CORES, '8')
+        assert cpus.count() == 1
+        assert cpus.first().MAX_CPU_CORES == '8'
     
-    def test_count_cpu(self):
+    def test_count_cpu(self, test_cpus):
         """Тест подсчета CPU"""
+        from cpu.models import Cpu
+        
         count = Cpu.objects.count()
-        self.assertEqual(count, 3)
+        assert count == 3
+
+
+class TestCpuParameterized:
+    """Параметризованные тесты CPU"""
+    
+    @pytest.mark.parametrize("uuid_server,cores,threads,name", [
+        ('uuid-1', '4', '8', 'Intel i3'),
+        ('uuid-2', '6', '12', 'Intel i5'),
+        ('uuid-3', '8', '16', 'Intel i7'),
+    ])
+    def test_create_multiple_cpus(self, uuid_server, cores, threads, name):
+        """Тест создания CPU с разными параметрами"""
+        from cpu.models import Cpu
+        
+        cpu = Cpu.objects.create(
+            UuidServer=uuid_server,
+            MAX_CPU_CORES=cores,
+            MAX_CPU_THREADS=threads,
+            CPU_NAME=name
+        )
+        
+        assert cpu.UuidServer == uuid_server
+        assert cpu.MAX_CPU_CORES == cores
+        assert cpu.MAX_CPU_THREADS == threads
+        assert cpu.CPU_NAME == name

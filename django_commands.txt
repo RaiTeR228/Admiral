@@ -97,3 +97,21 @@ port — порт SSH (можно указать нестандартный)
 maxretry — сколько неудачных попыток допускается
 findtime — за какой период анализируются попытки
 bantime — время блокировки IP
+
+
+pytest
+
+через python -m pytest
+    python -m pytest
+
+запуск конкретного файла
+    python -m pytest .\cpu\tests.py
+
+запуск конкретной директории
+    python -m pytest cpu/
+
+с подробном выводом
+    pytest -m pytest -v .\cpu\tests.py
+
+с выводом print (если нужна отладка)
+    python -m pytest -s .\cpu\tests.py

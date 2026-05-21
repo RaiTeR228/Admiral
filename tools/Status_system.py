@@ -142,7 +142,7 @@ def get_local_ip():
     filtered_ips = [ip for ip in ip_addresses if not ip.startswith("127.")]
     return filtered_ips if filtered_ips else None 
 
-# # GPU information
+
 def Gpu_Info():
     # print("="*40, "GPU Details", "="*40)
     gpus = 1#GPUtil.getGPUs()
