@@ -501,11 +501,11 @@ def castm_function():
     print("\n📊 Шаг 4: Запуск сборщиков метрик...")
 
     scripts_to_run = [
-        ('send_requests_cpu.py', 'CPU Monitor'),
-        ('send_requests_ram.py', 'RAM Monitor'),
-        ('send_requests_disk.py', 'Disk Monitor'),
-        # ('send_request_gpu.py', 'GPU Monitor'),
-        ('send_statistic_server.py', 'Metric Monitor'),
+        ('send_requests_post_cpu.py', 'CPU Monitor'),
+        ('send_requests_post_ram.py', 'RAM Monitor'),
+        ('send_requests_post_disk.py', 'Disk Monitor'),
+        ('send_requests_post_gpu.py', 'GPU Monitor'),
+        ('send_statistic_post_server.py', 'Metric Monitor'),
     ]
     
     for script_name, monitor_name in scripts_to_run:

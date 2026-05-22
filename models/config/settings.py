@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "gpu",
     "disk",
     "ram",
+    "temperature",
 ]
 
 MIDDLEWARE = [

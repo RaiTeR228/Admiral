@@ -10,7 +10,6 @@ def collect_stats():
     gpus = GPUtil.getGPUs()
     
     if gpus:
-        # Реальный GPU
         gpu = gpus[0]
         return {
             "GPU_NAME": gpu.name,

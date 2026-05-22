@@ -11,5 +11,6 @@ class Server(models.Model):
     SystemPC = models.CharField(max_length=100, null=True, blank=True, help_text="Система пк")
     Local_Name_PC = models.CharField(max_length=100, null=True, blank=True, help_text="Локальное имя пк")
 
+
     def __str__(self):
         return self.name

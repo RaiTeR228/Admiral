@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Monitor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <div class="topbar">
+        <div>
+            <h1>Мониторинг</h1>
+            <p>3 сервера онлайн</p>
+        </div>
+
+        <div class="avatar"></div>
+    </div>
+
+    <div class="server-card">
+        <div class="server-header">
+            <div>
+                <h2>Main Node</h2>
+                <span>Ubuntu 24.04</span>
+            </div>
+
+            <div class="status online"></div>
+        </div>
+
+        <div class="metrics">
+
+            <div class="metric">
+                <span>CPU</span>
+                <h3>43%</h3>
+
+                <div class="progress">
+                    <div class="fill cpu"></div>
+                </div>
+            </div>
+
+            <div class="metric">
+                <span>RAM</span>
+                <h3>68%</h3>
+
+                <div class="progress">
+                    <div class="fill ram"></div>
+                </div>
+            </div>
+
+            <div class="metric">
+                <span>Disk</span>
+                <h3>21%</h3>
+
+                <div class="progress">
+                    <div class="fill disk"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="small-card">
+            <span>Температура</span>
+            <h2>54°C</h2>
+        </div>
+
+        <div class="small-card">
+            <span>Ping</span>
+            <h2>12ms</h2>
+        </div>
+
+        <div class="small-card">
+            <span>Сеть</span>
+            <h2>1.2Gb/s</h2>
+        </div>
+
+        <div class="small-card">
+            <span>Аптайм</span>
+            <h2>12d</h2>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active">🏠</div>
+        <div class="nav-item">📊</div>
+        <div class="nav-item">🖥️</div>
+        <div class="nav-item">⚙️</div>
+    </div>
+
+</div>
+
+</body>
+</html>

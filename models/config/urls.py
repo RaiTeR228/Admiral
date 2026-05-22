@@ -30,6 +30,7 @@ from metric.views import *
 from sshlog.views import SSHLogViewSet
 from ram.api import RamMetricsView
 from gpu.api import GPUMetricsView, GPUListView
+from temperature.api import TempMetricsView, TempListView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from disk.api import DiskMetricsView
@@ -61,6 +62,9 @@ urlpatterns = [
     path('api/cpu/get-cpu/', CPUListView.as_view(), name='get-cpu'),
     path('api/cpu/server/<str:server_uuid>/', CPUSpecificView.as_view(), name='cpu-specific'),
     
+    path('api/post-temp/', TempMetricsView.as_view()),
+    path('api/get-temp/', TempListView.as_view(), name='get-temp'),
+
     path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
     path('api/', include(router.urls)),
 ]
