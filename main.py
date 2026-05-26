@@ -443,6 +443,7 @@ def main():
                 break
             
             elif choice == '7':
+                run_migrations()
                 generate_api_token()
                 # После генерации токена не выходим, показываем меню снова
                 input("\nНажмите Enter для продолжения...")
@@ -505,6 +506,7 @@ def castm_function():
         ('send_requests_post_ram.py', 'RAM Monitor'),
         ('send_requests_post_disk.py', 'Disk Monitor'),
         ('send_requests_post_gpu.py', 'GPU Monitor'),
+        ('send_requests_post_temp.py', 'Temperature Monitor'),
         ('send_statistic_post_server.py', 'Metric Monitor'),
     ]
     

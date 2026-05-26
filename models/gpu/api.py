@@ -179,33 +179,102 @@ class GPUMetricsView(APIView):
             }, status=500)
     
     def get(self, request):
-        """Получение данных о GPU по API ключу"""
+        """Получение данных о GPU по API ключу или ID"""
         try:
-            # Аутентификация
-            server, auth_response = self._authenticate(request)
-            if auth_response:
-                return auth_response
+            # Получаем параметры из URL
+            server_id = request.query_params.get('server_id')
+            gpu_id = request.query_params.get('gpu_id')
             
-            # Получаем данные
-            try:
-                gpu_data = gpu.objects.get(UuidServer=server.uuid)
+            # Если указан server_id или gpu_id - используем их для поиска
+            if server_id or gpu_id:
+                # Поиск по server_id
+                if server_id:
+                    try:
+                        server_obj = Server.objects.get(id=server_id)
+                        # ИСПРАВЛЕНО: используем filter вместо get
+                        gpus_data = gpu.objects.filter(UuidServer=server_obj.uuid)
+                        
+                        if not gpus_data.exists():
+                            return Response({
+                                "success": False,
+                                "message": f"GPU data not found for server {server_id}"
+                            }, status=404)
+                        
+                        # Возвращаем все GPU сервера
+                        return Response({
+                            "success": True,
+                            "server_id": server_obj.id,
+                            "server_uuid": str(server_obj.uuid),
+                            "server_name": server_obj.name,
+                            "gpus_count": gpus_data.count(),
+                            "gpus": [
+                                {
+                                    "gpu_id": gpu.id,
+                                    "gpu_name": gpu.GPU_NAME,
+                                    "max_threads": gpu.MAX_GPU_THREADS,
+                                    "gpu_size": gpu.GPU_SIZE_GB,
+                                } for gpu in gpus_data
+                            ]
+                        })
+                    except Server.DoesNotExist:
+                        return Response({
+                            "success": False,
+                            "message": f"Server with id {server_id} not found"
+                        }, status=404)
+                
+                # Поиск по gpu_id
+                elif gpu_id:
+                    try:
+                        gpu_data = gpu.objects.get(id=gpu_id)
+                        server_obj = Server.objects.get(uuid=gpu_data.UuidServer)
+                        return Response({
+                            "success": True,
+                            "gpu_id": gpu_data.id,
+                            "server_id": server_obj.id,
+                            "server_uuid": str(server_obj.uuid),
+                            "server_name": server_obj.name,
+                            "gpu": {
+                                "gpu_name": gpu_data.GPU_NAME,
+                                "max_threads": gpu_data.MAX_GPU_THREADS,
+                                "gpu_size": gpu_data.GPU_SIZE_GB,
+                            }
+                        })
+                    except gpu.DoesNotExist:
+                        return Response({
+                            "success": False,
+                            "message": f"GPU with id {gpu_id} not found"
+                        }, status=404)
+            
+            # Если ID не указан - используем стандартную аутентификацию
+            else:
+                server, auth_response = self._authenticate(request)
+                if auth_response:
+                    return auth_response
+                
+                # ИСПРАВЛЕНО: используем filter вместо get
+                gpus_data = gpu.objects.filter(UuidServer=server.uuid)
+                
+                if not gpus_data.exists():
+                    return Response({
+                        "success": False,
+                        "message": "GPU data not found for this server"
+                    }, status=404)
+                
+                # Возвращаем все GPU сервера
                 return Response({
                     "success": True,
                     "server_uuid": str(server.uuid),
                     "server_name": server.name,
-                    "gpu": {
-                        "gpu_name": gpu_data.GPU_NAME,
-                        "max_threads": gpu_data.MAX_GPU_THREADS,
-                        "gpu_size": gpu_data.GPU_SIZE_GB,
-                        "created_at": gpu_data.created_at,
-                        "updated_at": gpu_data.updated_at
-                    }
+                    "gpus_count": gpus_data.count(),
+                    "gpus": [
+                        {
+                            "gpu_id": gpu.id,
+                            "gpu_name": gpu.GPU_NAME,
+                            "max_threads": gpu.MAX_GPU_THREADS,
+                            "gpu_size": gpu.GPU_SIZE_GB,
+                        } for gpu in gpus_data
+                    ]
                 })
-            except gpu.DoesNotExist:
-                return Response({
-                    "success": False,
-                    "message": "GPU data not found for this server"
-                }, status=404)
                 
         except Exception as e:
             logger.error(f"Failed to get GPU metrics: {str(e)}", exc_info=True)

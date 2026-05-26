@@ -1,6 +1,9 @@
 from django.db import models
 
 class Temp(models.Model):
-    temp = models.FloatField(help_text="Temperature Celsius")
+    # 'acpitz': [shwtemp(label='', current=47.0, high=None, critical=None)]
+    current_temp = models.FloatField(help_text="Temperature Celsius", null=True, blank=True)
+    status_critical = models.BooleanField(null=True, blank=True)
+
     UuidServer = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

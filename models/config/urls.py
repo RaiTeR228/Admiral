@@ -55,15 +55,17 @@ urlpatterns = [
     path('api/get-api-key/', GetAPIKeyView.as_view()),
     path('api/regenerate-api-key/', RegenerateAPIKeyView.as_view()),
 
-    path("api/post-gpu/", GPUMetricsView.as_view()),
-    path("api/get-gpu/", GPUListView.as_view()),
+    # path("api/post-gpu/", GPUMetricsView.as_view()),
+    # path("api/get-gpu/", GPUListView.as_view()),
+    path("api/gpu/", GPUMetricsView.as_view()),
 
     path("api/cpu/", CPUMetricsView.as_view()),
-    path('api/cpu/get-cpu/', CPUListView.as_view(), name='get-cpu'),
+    # path('api/cpu/get-cpu/', CPUListView.as_view(), name='get-cpu'),
     path('api/cpu/server/<str:server_uuid>/', CPUSpecificView.as_view(), name='cpu-specific'),
     
-    path('api/post-temp/', TempMetricsView.as_view()),
-    path('api/get-temp/', TempListView.as_view(), name='get-temp'),
+    # path('api/post-temp/', TempMetricsView.as_view()),
+    path('api/temp/', TempMetricsView.as_view()),
+    # path('api/get-temp/', TempListView.as_view(), name='get-temp'),
 
     path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
     path('api/', include(router.urls)),

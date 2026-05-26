@@ -7,7 +7,7 @@ from Status_system import *
 
 API_URL = "http://127.0.0.1:8000/api/get-gpu/"
 API_KEY = "d1045ccac017a6037c60d969434ab94044747c227c3c84938b6a3bc244a7da24"
-NAME_SERVER = "тест"
+NAME_SERVER = "zcx"
 
 def collect_stats():
     gpus = GPUtil.getGPUs()

@@ -1,9 +1,11 @@
 настройка бд - https://metanit.com/python/django/5.9.php
 
+настройка xterm - https://chat.deepseek.com/a/chat/s/844ed425-7835-4a29-ae66-50baaf79c154
 
 
-для запуса web версии
-    python manage.py runserver 8080
+для запуса web версии (в ufw allow 8000)
+    python manage.py runserver 8080 
+    python manage.py runserver 0.0.0.0:8000
 
 если не отображаются таблици в бд, при использовании команды python manage.py makemigrations
     то надо указывать явные приложения python manage.py makemigrations car hors km
@@ -13,7 +15,7 @@
     [ ] django-admin startproject config
     [ ] python manage.py startapp Server
 
-[ ] pip install django djangorestframework psycopg (если не установлен)
+[ ] pip install django djangorestframework psycopg django-cors-headers (если не установлен)
 [ ] python manage.py makemigrations
 [ ] python manage.py migrate
 [ ] python manage.py createsuperuser (для админки)

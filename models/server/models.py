@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 
 class Server(models.Model):
-    id = models.AutoField(primary_key=True)  # явно указываем
+    id = models.AutoField(primary_key=True)  
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=255)
     api_key = models.CharField(max_length=255)
@@ -10,6 +10,8 @@ class Server(models.Model):
     ip = models.GenericIPAddressField(null=True, blank=True)
     SystemPC = models.CharField(max_length=100, null=True, blank=True, help_text="Система пк")
     Local_Name_PC = models.CharField(max_length=100, null=True, blank=True, help_text="Локальное имя пк")
+
+    is_active = models.BooleanField(default=True)
 
 
     def __str__(self):

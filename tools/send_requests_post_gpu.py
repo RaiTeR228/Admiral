@@ -2,9 +2,9 @@ import time
 import requests
 import GPUtil
 
-API_URL = "http://127.0.0.1:8000/api/post-gpu/"
-API_KEY = "82569fbbdbae3cc71725cbdd58943127e0a58ad47c2f7aad7c454f865a6b31c9"
-NAME_SERVER = "тест"
+API_URL = "http://127.0.0.1:8000/api/gpu/"
+API_KEY = "31fae73538bd56225e08417f62d7c874c8c2c578f8afb24651dacb5b691cb442"
+NAME_SERVER = "zxc"
 
 def collect_stats():
     gpus = GPUtil.getGPUs()

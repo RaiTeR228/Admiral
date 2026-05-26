@@ -3,8 +3,8 @@ import requests
 from Status_system import *
 
 API_URL = "http://127.0.0.1:8000/api/post-stats/"
-API_KEY = "53076c29a60f29c76d7bd74cbe10a15c837bb3f7c7ba921d071c6cb5eeb96ce3"
-NAME_SERVER = "тест"
+API_KEY = "31fae73538bd56225e08417f62d7c874c8c2c578f8afb24651dacb5b691cb442"
+NAME_SERVER = "zxc"
 
 
 def collect_stats():

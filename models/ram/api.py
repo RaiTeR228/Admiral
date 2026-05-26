@@ -77,12 +77,10 @@ class RamMetricsView(APIView):
                 ram_data = Ram.objects.get(UuidServer=server.uuid)
                 return Response({
                     "success": True,
+                    "id": ram_data.id,
                     "server_uuid": str(server.uuid),
                     "ram": {
                         "max_ram": ram_data.MAX_RAM,
-                        "local_name": ram_data.Local_Name_PC,
-                        "created_at": ram_data.created_at,
-                        "updated_at": ram_data.updated_at
                     }
                 })
             except Ram.DoesNotExist:
