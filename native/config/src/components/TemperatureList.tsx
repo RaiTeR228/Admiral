@@ -1,0 +1,113 @@
+import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { FlatList, View, Text, StyleSheet } from 'react-native';
+
+const API_URL = 'http://127.0.0.1:8000/api/temp/';
+const API_KEY = '31fae73538bd56225e08417f62d7c874c8c2c578f8afb24651dacb5b691cb442';
+
+interface ServerResponse {
+    id: number;
+    server_uuid: string;
+    temperature:{
+        current_temp: number;
+        status_critical: boolean;
+    }
+}
+
+const apiClient = axios.create({
+    baseURL: 'http://127.0.0.1:8000/api/',
+    headers: {
+        'Authorization': `Api-Key ${API_KEY}`,
+        'Content-Type': 'application/json',
+    }
+});
+
+const TemperatureList = () => {
+    const [temperatureData, setTemperatureData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const getTemperatureData = async () => {
+        try {
+            setLoading(true);
+            const response = await apiClient.get<ServerResponse>('temp/');
+            // console.log('Temperature data:', response.data.temperature);
+            setTemperatureData(response.data.temperature);
+        } catch (err) {
+            setError('Ошибка загрузки данных');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        getTemperatureData();
+    }, []);
+
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <Text>Загрузка информации о температуре...</Text>
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.error}>Ошибка: {error}</Text>
+            </View>
+        );
+    }
+
+    if (!temperatureData) {
+        return (
+            <View style={styles.container}>
+                <Text>Нет данных о температуре</Text>
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Информация о температуре</Text>
+            <View style={styles.card}>
+                <Text style={styles.label}>Текущая температура:</Text>
+                <Text style={styles.value}>{temperatureData.current_temp}°C</Text>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 15,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    card: {
+        backgroundColor: '#f0f0f0',
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    label: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 5,
+    },
+    value: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    error: {
+        color: 'red',
+    },
+});
+
+export default TemperatureList;
