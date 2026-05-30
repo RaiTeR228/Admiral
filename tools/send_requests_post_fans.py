@@ -2,10 +2,14 @@ import time
 import requests
 import sys
 import psutil
-[]
-API_URL = "http://192.168.1.219:8000/api/temp/"
-API_KEY = "82569fbbdbae3cc71725cbdd58943127e0a58ad47c2f7aad7c454f865a6b31c9"
-NAME_SERVER = "zxc"
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+API_URL = "http://127.0.0.1:8000/api/temp/"
+API_KEY = os.getenv("API_TOKEN")
+NAME_SERVER = os.getenv("NAME_SERVER")
 
 def collect_stats():
 

@@ -31,6 +31,8 @@ from sshlog.views import SSHLogViewSet
 from ram.api import RamMetricsView
 from gpu.api import GPUMetricsView, GPUListView
 from temperature.api import TempMetricsView, TempListView
+from speed_eth.api import SpeedEthView
+from htop.api import HtopMetricsView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from disk.api import DiskMetricsView
@@ -44,8 +46,9 @@ router.register(r'ssh-logs', views.SSHLogViewSet, basename='ssh-log')
 urlpatterns = [
     path("api/register/", RegisterServerView.as_view()),
 
+    # метрика
     path("api/post-stats/", ReceiveStatsView.as_view()),
-    path("api/get-stats-list/", ServerStatListView.as_view()),
+    path("api/get-stats/", ServerStatListView.as_view()), #ReceiveStatsView
     # path("api/server_info/", RegisterServerView.as_view()),
     
     path("api/ram/", RamMetricsView.as_view()),
@@ -67,7 +70,11 @@ urlpatterns = [
     path('api/temp/', TempMetricsView.as_view()),
     # path('api/get-temp/', TempListView.as_view(), name='get-temp'),
 
-    path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
+    path('api/htop/', HtopMetricsView.as_view(), name='htop-metrics'), #нe работает хуйня
+
+    path('api/speed-eth/', SpeedEthView.as_view(), name='speed-eth'),
+
+    # path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
     path('api/', include(router.urls)),
 ]
 

@@ -57,12 +57,12 @@ class RamMetricsView(APIView):
             
         except Exception as e:
             return Response({
-                "error": "Failed to save CPU metrics",
+                "error": "Failed to save RAM metrics",
                 "details": str(e)
             }, status=500)
     
     def get(self, request):
-        """Получение данных о CPU по API ключу"""
+        """Получение данных о RAM по API ключу"""
         try:
             api_key = request.headers.get('Authorization', '').replace('Api-Key ', '')
             if not api_key:

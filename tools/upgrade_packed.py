@@ -3,7 +3,7 @@
 import sys
 
 if sys.platform == "win32":
-    sys.exit(1) 
+    sys.exit(0)
 
 import subprocess
 import logging

@@ -1,10 +1,14 @@
 import time
 import requests
 import GPUtil
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 API_URL = "http://127.0.0.1:8000/api/gpu/"
-API_KEY = "31fae73538bd56225e08417f62d7c874c8c2c578f8afb24651dacb5b691cb442"
-NAME_SERVER = "zxc"
+API_KEY = os.getenv("API_TOKEN")
+NAME_SERVER = os.getenv("NAME_SERVER")
 
 def collect_stats():
     gpus = GPUtil.getGPUs()
@@ -23,20 +27,17 @@ def collect_stats():
             "GPU_SIZE_GB": "1"
         }
 
-while True:
-    data = collect_stats()
-    print("Отправляем:", data)
-    
-    try:
-        response = requests.post(
-            API_URL,
-            json=data,
-            headers={"Authorization": f"Api-Key {API_KEY}"},
-            timeout=5
-        )
-        print("Статус:", response.status_code)
-        print("Ответ:", response.text)
-    except Exception as e:
-        print("Ошибка:", e)
-    
-    time.sleep(10)
+data = collect_stats()
+print("Отправляем:", data)
+
+try:
+    response = requests.post(
+        API_URL,
+        json=data,
+        headers={"Authorization": f"Api-Key {API_KEY}"},
+        timeout=5
+    )
+    print("Статус:", response.status_code)
+    print("Ответ:", response.text)
+except Exception as e:
+    print("Ошибка:", e)

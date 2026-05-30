@@ -2,10 +2,14 @@ import time
 import requests
 import sys
 import psutil
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 API_URL = "http://127.0.0.1:8000/api/temp/"
-API_KEY = "31fae73538bd56225e08417f62d7c874c8c2c578f8afb24651dacb5b691cb442"
-NAME_SERVER = "zxc"
+API_KEY = os.getenv("API_TOKEN")
+NAME_SERVER = os.getenv("NAME_SERVER")
 
 def collect_stats():
     #  return {
@@ -17,7 +21,7 @@ def collect_stats():
     #  }
 
     if sys.platform == "win32":
-        sys.exit(1)
+        return None
 
     temps = psutil.sensors_temperatures()
 

@@ -2,6 +2,9 @@
 
 настройка xterm - https://chat.deepseek.com/a/chat/s/844ed425-7835-4a29-ae66-50baaf79c154
 
+Получение доступа к камере react native https://purpleschool.ru/knowledge-base/react-native/work-with-components/react-native-camera
+
+django-filter==25.2
 
 для запуса web версии (в ufw allow 8000)
     python manage.py runserver 8080 
@@ -117,3 +120,18 @@ pytest
 
 с выводом print (если нужна отладка)
     python -m pytest -s .\cpu\tests.py
+
+
+
+КОМПИЛЯЦИЯ  APK файла в Android studio
+
+вводим команду в терминале(Alt+F12): 
+    npx expo prebuild
+
+Это создаст в корне проекта папку android со всеми необходимыми нативными файлами.
+Потом переходим в папку android
+    cd android
+и вводим команду для компиляции apk в дебаг режиме
+    ./gradlew assembleDebug
+или в релиз
+    ./gradlew assembleRelease

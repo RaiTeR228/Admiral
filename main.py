@@ -3,6 +3,8 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+import glob
+from tools.qrcode_generate import generate_qr_code
 # from tools.upgrade_packed import run_apt_update
 
 # Определяем пути
@@ -25,6 +27,10 @@ def run_command(cmd, wait=True):
 
 def run_ssh_monitor(log_file='/var/log/auth.log'):
     """Запуск SSH монитора"""
+
+    if sys.platform.startswith('win'):
+        return None  
+    
     # Используем Path объект для правильного пути
     ssh_script = tools_path / 'ssh_tools.py'
     
@@ -83,6 +89,8 @@ def generate_api_token():
     print("=" * 50)
     
     try:
+        # Создание миграции перед генерации ключика
+        run_migrations()
         # Инициализируем Django
         init_django()
         
@@ -97,10 +105,7 @@ def generate_api_token():
         if not server_name:
             print("❌ Ошибка: Имя сервера обязательно!")
             return
-        
-        # Дополнительная информация (опционально)
-        # add_extra = input("Добавить дополнительную информацию? (y/n): ").strip().lower()
-        
+
         import psutil
         import platform
         import socket
@@ -167,8 +172,17 @@ def generate_api_token():
                 print(f"📅 Создан: {existing_server.created_at}")
                 print("=" * 50)
         else:
+
+            def save_to_env(api_key):
+                """Сохранить API ключ в .env файл"""
+                env_path = project_root / '.env'
+                with open(env_path, 'w') as f:
+                    f.write(f'API_TOKEN="{api_key}"\nNAME_SERVER="{server_name}"\nUUID="{server.uuid}"')
+                print(f"\nAPI ключ сохранен в {env_path}\n")
+
             # Создаем новый сервер
             api_key = secrets.token_hex(32)
+            save_to_env(api_key)
             
             server = Server.objects.create(
                 name=server_name,
@@ -193,23 +207,24 @@ def generate_api_token():
                 print(f"🏠 Локальное имя: {local_name_pc}")
             print(f"📅 Создан: {server.created_at}")
             print("=" * 50)
-            print("\n⚠️  СОХРАНИТЕ API КЛЮЧ! Он понадобится для настройки мониторинга.")
-            print("Используйте его в заголовке X-API-Key для запросов к API\n")
         
-        # Дополнительные опции
-        print("\n📋 ДОПОЛНИТЕЛЬНЫЕ ДЕЙСТВИЯ:")
-        print("1. Показать все серверы")
-        print("2. Удалить сервер")
-        print("3. Вернуться в главное меню")
+        # функция для генерации QR кода с API ключом
+        generate_qr_code()
+
+        # # Дополнительные опции
+        # print("\n📋 ДОПОЛНИТЕЛЬНЫЕ ДЕЙСТВИЯ:")
+        # print("1. Показать все серверы")
+        # print("2. Удалить сервер")
+        # print("3. Вернуться в главное меню")
         
-        action = input("Выберите действие (1-3): ").strip()
+        # action = input("Выберите действие (1-3): ").strip()
         
-        if action == '1':
-            show_all_servers()
-        elif action == '2':
-            delete_server(server_name)
-        elif action == '3':
-            return
+        # if action == '1':
+        #     show_all_servers()
+        # elif action == '2':
+        #     delete_server(server_name)
+        # elif action == '3':
+        #     return
         
     except Exception as e:
         print(f"\n❌ Ошибка при генерации API токена: {e}")
@@ -351,6 +366,7 @@ def show_menu():
     print("8. 📋 Показать все серверы")
     print("9. 🗑️  Удалить сервер")
     print("10. 🚀 Запустить кастомную функцию (run)")
+    print("11. Получить QR код для подключения через мобильное приложение")
     print("0. Выход")
     print("=" * 50)
 
@@ -460,17 +476,20 @@ def main():
                 print("🚀 Запуск кастомной функции...")
                 castm_function()
                 break
+
+            elif choice == '11':
+                generate_qr_code()
+                input("\nНажмите Enter для продолжения...")
+                break
             
             elif choice == '0':
-                print("👋 До свидания!")
                 break
 
             elif command == 'run':
-                # Новый режим: запуск castm_function
                 castm_function()
             
             else:
-                print("❌ Неверный выбор! Попробуйте снова.")
+                print("Неверный выбор!")
 
 
 def castm_function():
@@ -488,8 +507,6 @@ def castm_function():
     
     if django_process:
         processes.append(('Django Server', django_process))
-        print("Django сервер запущен")
-        # time.sleep(10)
     else:
         print("Не удалось запустить Django сервер")
         return
@@ -497,32 +514,17 @@ def castm_function():
     ssh_process = run_ssh_monitor()
     if ssh_process:
         processes.append(('SSH Monitor', ssh_process))
-        print("SSH монитор запущен")
-
-    print("\n📊 Шаг 4: Запуск сборщиков метрик...")
-
-    scripts_to_run = [
-        ('send_requests_post_cpu.py', 'CPU Monitor'),
-        ('send_requests_post_ram.py', 'RAM Monitor'),
-        ('send_requests_post_disk.py', 'Disk Monitor'),
-        ('send_requests_post_gpu.py', 'GPU Monitor'),
-        ('send_requests_post_temp.py', 'Temperature Monitor'),
-        ('send_statistic_post_server.py', 'Metric Monitor'),
-    ]
     
-    for script_name, monitor_name in scripts_to_run:
-        script_path = tools_path / script_name
-        if script_path.exists():
+    all_filenames = glob.glob(f'{tools_path}/*.py')
+    for all_filename in all_filenames:
+        if Path(all_filename).exists():
             try:
-                # Запускаем с небольшой задержкой между запусками
                 time.sleep(2)
-                process = subprocess.Popen([sys.executable, str(script_path)])
-                processes.append((monitor_name, process))
-                print(f"{monitor_name} запущен")
+                process = subprocess.Popen([sys.executable, str(all_filename)])
+                processes.append((all_filename, process))
+                print(f"{all_filename} запущен")
             except Exception as e:
-                print(f"Ошибка запуска {monitor_name}: {e}")
-        else:
-            print(f"Файл {script_name} не найден, пропускаем")
+                print(f"Ошибка запуска {e}")
     
     if len(processes) <= 1:  # Только Django сервер
         print(" Не удалось запустить ни один мониторинг")

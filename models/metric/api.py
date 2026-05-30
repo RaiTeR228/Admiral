@@ -11,10 +11,14 @@ from metric.models import ServerStat
 
 
 def get_server_from_request(request):
-    auth_header = request.headers.get("Authorization")
+    auth_header = request.headers.get("Authorization",'')
 
     if not auth_header:
         return None
+        # return Response ({
+        #     "error":"Api key required",
+        #     "details":"Please provide API key in Authorization header"
+        # }, status= 401)
 
     try:
         prefix, api_key = auth_header.split()
@@ -28,31 +32,79 @@ def get_server_from_request(request):
         return Server.objects.get(api_key=api_key)
     except Server.DoesNotExist:
         return None
-
+        # return Response ({
+        #     "error": "Invalid API key",
+        #     "details": "No server found with this API key"
+        # }, status=401)
 
 class ReceiveStatsView(APIView):
 
-    
     def post(self, request):
         server = get_server_from_request(request)
 
         def clean_percent(value):
             if not value:
-                return None
-            return float(str(value).replace('%', '').strip())
+                return None  # Возвращаем None, а не Response
+            try:
+                return float(str(value).replace('%', '').strip())
+            except (ValueError, TypeError):
+                return None  # При ошибке конвертации тоже возвращаем None
 
         if not server:
             return Response({"error": "Unauthorized"}, status=403)
 
+        # Очищаем значения
+        cpu_value = clean_percent(request.data.get("Use_Cpu"))
+        ram_value = clean_percent(request.data.get("Use_Ram"))
+        swap_value = clean_percent(request.data.get("Use_Swap"))
+
+        # Проверяем, что значения успешно очищены
+        if cpu_value is None or ram_value is None or swap_value is None:
+            return Response({
+                "error": "Invalid data",
+                "details": "CPU, RAM, and Swap values must be valid numbers"
+            }, status=400)
+
         ServerStat.objects.create(
             server=server,
-            Use_Cpu=clean_percent(request.data.get("Use_Cpu")), 
-            Use_Ram=clean_percent(request.data.get("Use_Ram")),    
-            Use_Swap=clean_percent(request.data.get("Use_Swap")),  
+            Use_Cpu=cpu_value, 
+            Use_Ram=ram_value,    
+            Use_Swap=swap_value,  
             # IO=request.data.get("IO"),
         )
 
         return Response({"status": "ok"})
+    
+    def get (self, request):
+        server = get_server_from_request(request)
+
+        def clean_percent(value):
+            if not value:
+                return None  # Возвращаем None, а не Response
+            try:
+                return float(str(value).replace('%', '').strip())
+            except (ValueError, TypeError):
+                return None  # При ошибке конвертации тоже возвращаем None
+
+        if not server:
+            return Response({"error": "Unauthorized"}, status=403)
+        
+        try:
+            stats = ServerStat.objects.filter(server__id=server.id).order_by('-created_at').first()
+            return Response({
+                "success":True,
+                "id":stats.id,
+                "server_id": server.id,
+                "Use_Cpu": stats.Use_Cpu,
+                "Use_Ram": stats.Use_Ram,
+                "Use_Swap": stats.Use_Swap,
+                "created_at": stats.created_at
+            })
+        except ServerStat.DoesNotExist:
+            return Response({"error": "No stats found for this server"}, status=404)
+        # queryset = ServerStat.objects.all().order_by("-created_at")
+        # serializer_class = ServerStatSerializer
+
     
 class ServerStatSerializer(ModelSerializer):
     class Meta:
