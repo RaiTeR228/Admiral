@@ -27,6 +27,7 @@ from server.api import *
 from cpu.api import CPUMetricsView, CPUListView, CPUSpecificView
 from metric.api import ReceiveStatsView, ServerStatListView
 from metric.views import *
+from uptime.api import UptimeView
 from sshlog.views import SSHLogViewSet
 from ram.api import RamMetricsView
 from gpu.api import GPUMetricsView, GPUListView
@@ -73,9 +74,11 @@ urlpatterns = [
     path('api/htop/', HtopMetricsView.as_view(), name='htop-metrics'), #нe работает хуйня
 
     path('api/speed-eth/', SpeedEthView.as_view(), name='speed-eth'),
+    path('api/uptime/', UptimeView.as_view(), name='uptime'),
 
     # path('dashboard/', StatsDashboardView.as_view(), name='dashboard'),
     path('api/', include(router.urls)),
+    path('api/health/', HealthCheckView.as_view(), name='health-check'),
 ]
 
 

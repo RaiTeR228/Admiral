@@ -33,7 +33,7 @@ def get_server_from_api_key(request):
 
 class HtopMetricsView(APIView):
     """API для приема и сохранения данных о процессах (htop)"""
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
     
     def post(self, request):
         try:
@@ -117,7 +117,7 @@ class HtopMetricsView(APIView):
             # Получаем последние записи процессов для сервера (топ по CPU)
             processes = Htop.objects.filter(
                 UuidServer=str(server.uuid)
-            ).order_by('-created_at', '-cpu_usage')[:50]  # Последние 50 процессов с высоким CPU
+            ).order_by( '-cpu_usage')[:20]  # Последние 20 процессов с высоким CPU
             
             if processes.exists():
                 process_list = []

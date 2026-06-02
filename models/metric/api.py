@@ -57,12 +57,13 @@ class ReceiveStatsView(APIView):
         cpu_value = clean_percent(request.data.get("Use_Cpu"))
         ram_value = clean_percent(request.data.get("Use_Ram"))
         swap_value = clean_percent(request.data.get("Use_Swap"))
+        procent_ram_value = clean_percent(request.data.get("Procent_Ram"))
 
         # Проверяем, что значения успешно очищены
-        if cpu_value is None or ram_value is None or swap_value is None:
+        if cpu_value is None or ram_value is None or swap_value is None or procent_ram_value is None:
             return Response({
                 "error": "Invalid data",
-                "details": "CPU, RAM, and Swap values must be valid numbers"
+                "details": "CPU, RAM, Swap, and PROCENT_RAM values must be valid numbers"
             }, status=400)
 
         ServerStat.objects.create(
@@ -70,6 +71,7 @@ class ReceiveStatsView(APIView):
             Use_Cpu=cpu_value, 
             Use_Ram=ram_value,    
             Use_Swap=swap_value,  
+            PROCENT_RAM=procent_ram_value,
             # IO=request.data.get("IO"),
         )
 
@@ -98,6 +100,7 @@ class ReceiveStatsView(APIView):
                 "Use_Cpu": stats.Use_Cpu,
                 "Use_Ram": stats.Use_Ram,
                 "Use_Swap": stats.Use_Swap,
+                "PROCENT_RAM": stats.PROCENT_RAM,
                 "created_at": stats.created_at
             })
         except ServerStat.DoesNotExist:

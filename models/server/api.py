@@ -14,10 +14,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Server
 
-# В settings.py лучше добавить:
-# INSTALL_TOKEN = os.getenv('INSTALL_TOKEN', secrets.token_hex(32))
-# REGISTRATION_TIMEOUT = 3600  # 1 час
-
 class RegisterServerView(APIView):
     """Регистрация нового сервера с получением API токена"""
     permission_classes = [AllowAny]
@@ -210,3 +206,12 @@ class RegenerateAPIKeyView(APIView):
             return Response({
                 "error": "Server not found"
             }, status=404)
+    
+class HealthCheckView(APIView):
+    """Проверка доступности API"""
+    # permission_classes = [AllowAny]
+    
+    def get(self, request):
+        return Response({
+            "status": True
+        })

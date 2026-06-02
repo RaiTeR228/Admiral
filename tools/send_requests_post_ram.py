@@ -8,16 +8,19 @@ import os
 
 load_dotenv()
 
-API_URL = "http://127.0.0.1:8000/api/ram/"
+IP_ADDRESS = os.getenv("IP_ADDRESS")
+PORT = os.getenv("PORT")
+PROTOCOL = os.getenv("PROTOCOL")
 API_KEY = os.getenv("API_TOKEN")
 NAME_SERVER = os.getenv("NAME_SERVER")
-
+API_URL = f"{PROTOCOL}://{IP_ADDRESS}:{PORT}/api/ram/"
 def collect_stats():
     ram = Ram_Info()
     return {
         "INSTALL_TOKEN": API_KEY,
         "MAX_RAM": Ram_Info()["total"],
-        "RAM_CHARACTERISTICS": Ram_Info()["total"],
+        # "PROCENT_RAM": psutil.virtual_memory().percent,
+        # "RAM_CHARACTERISTICS": Ram_Info()["total"],
     }
 
 data = collect_stats()

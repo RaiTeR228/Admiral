@@ -18,7 +18,7 @@ django-filter==25.2
     [ ] django-admin startproject config
     [ ] python manage.py startapp Server
 
-[ ] pip install django djangorestframework psycopg django-cors-headers (если не установлен)
+[ ] pip install django djangorestframework psycopg django-cors-headers django-filter(если не установлен)
 [ ] python manage.py makemigrations
 [ ] python manage.py migrate
 [ ] python manage.py createsuperuser (для админки)

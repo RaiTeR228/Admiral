@@ -4,7 +4,18 @@ import sys
 import subprocess
 from pathlib import Path
 import glob
-from tools.qrcode_generate import generate_qr_code
+from tools.qrcode_generate import *
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from typing import Optional
+import requests
+import uuid
+from datetime import datetime
+import json
+import socket
+import platform
+        
 # from tools.upgrade_packed import run_apt_update
 
 # Определяем пути
@@ -89,7 +100,7 @@ def generate_api_token():
     print("=" * 50)
     
     try:
-        # Создание миграции перед генерации ключика
+        # Создание миграции перед генерацией ключика
         run_migrations()
         # Инициализируем Django
         init_django()
@@ -106,15 +117,23 @@ def generate_api_token():
             print("❌ Ошибка: Имя сервера обязательно!")
             return
 
-        import psutil
-        import platform
-        import socket
+        get_url_ip = "https://api.ipify.org?format=json"
+
+        # Получаем информацию о системе
         hostname = socket.gethostname()
-        ip_address =  socket.gethostbyname(hostname)
+        # ip_address = socket.gethostbyname(hostname)
+        ip_address = requests.get(get_url_ip).json().get("ip")
         system_pc = platform.system()
         local_name_pc = platform.node()
-
-
+        
+        # Запрашиваем порт (опционально)
+        port_input = input("Порт сервера (Enter для 8000): ").strip()
+        port = int(port_input) if port_input else 8000
+        
+        # Запрашиваем протокол
+        protocol = input("Протокол (http/https, Enter для http): ").strip()
+        if not protocol:
+            protocol = "http"
         
         # Проверяем, существует ли сервер с таким именем
         existing_server = Server.objects.filter(name=server_name).first()
@@ -131,7 +150,7 @@ def generate_api_token():
                 new_api_key = secrets.token_hex(32)
                 existing_server.api_key = new_api_key
                 
-                # Обновляем дополнительную информацию, если указана
+                # Обновляем дополнительную информацию
                 if ip_address:
                     existing_server.ip = ip_address
                 if system_pc:
@@ -141,6 +160,20 @@ def generate_api_token():
                 
                 existing_server.save()
                 
+                # Сохраняем в .env
+                env_data = {
+                    'name': existing_server.name,
+                    'ip': ip_address,
+                    'port': port,
+                    'api_token': new_api_key,
+                    'protocol': protocol,
+                    'system_pc': system_pc,
+                    'local_name_pc': local_name_pc,
+                    'server_uuid': str(existing_server.uuid),
+                    'created_at': existing_server.created_at.isoformat()
+                }
+                save_server_to_env(env_data)
+                
                 print("\n" + "=" * 50)
                 print("✅ API КЛЮЧ ПЕРЕГЕНЕРИРОВАН!")
                 print("=" * 50)
@@ -148,12 +181,11 @@ def generate_api_token():
                 print(f"🆔 Server ID: {existing_server.id}")
                 print(f"🔑 UUID: {existing_server.uuid}")
                 print(f"🔐 API KEY: {new_api_key}")
-                print(f"🌐 IP: {existing_server.ip}")
-                print(f"💻 Система: {existing_server.SystemPC}")
-                print(f"🏠 Локальное имя: {existing_server.Local_Name_PC}")
+                print(f"🌐 IP: {existing_server.ip}:{port}")
                 print("=" * 50)
-                print("\n⚠️  ВНИМАНИЕ! Старый API ключ больше не действителен!")
-                print("Сохраните новый ключ в безопасном месте!\n")
+                
+                # Генерируем QR-код с полными данными
+                generate_qr_code(env_data)
             else:
                 # Показываем существующий ключ
                 print("\n" + "=" * 50)
@@ -164,25 +196,12 @@ def generate_api_token():
                 print(f"🔑 UUID: {existing_server.uuid}")
                 print(f"🔐 API KEY: {existing_server.api_key}")
                 if existing_server.ip:
-                    print(f"🌐 IP: {existing_server.ip}")
-                if existing_server.SystemPC:
-                    print(f"💻 Система: {existing_server.SystemPC}")
-                if existing_server.Local_Name_PC:
-                    print(f"🏠 Локальное имя: {existing_server.Local_Name_PC}")
+                    print(f"🌐 IP: {existing_server.ip}:{port}")
                 print(f"📅 Создан: {existing_server.created_at}")
                 print("=" * 50)
         else:
-
-            def save_to_env(api_key):
-                """Сохранить API ключ в .env файл"""
-                env_path = project_root / '.env'
-                with open(env_path, 'w') as f:
-                    f.write(f'API_TOKEN="{api_key}"\nNAME_SERVER="{server_name}"\nUUID="{server.uuid}"')
-                print(f"\nAPI ключ сохранен в {env_path}\n")
-
             # Создаем новый сервер
             api_key = secrets.token_hex(32)
-            save_to_env(api_key)
             
             server = Server.objects.create(
                 name=server_name,
@@ -192,6 +211,22 @@ def generate_api_token():
                 Local_Name_PC=local_name_pc
             )
             
+            # Данные для .env и QR-кода
+            env_data = {
+                'name': server.name,
+                'ip': ip_address,
+                'port': port,
+                'api_token': api_key,
+                'protocol': protocol,
+                'system_pc': system_pc,
+                'local_name_pc': local_name_pc,
+                'server_uuid': str(server.uuid),
+                'created_at': server.created_at.isoformat()
+            }
+            
+            # Сохраняем в .env
+            save_server_to_env(env_data)
+            
             print("\n" + "=" * 50)
             print("✅ НОВЫЙ СЕРВЕР УСПЕШНО ЗАРЕГИСТРИРОВАН!")
             print("=" * 50)
@@ -199,17 +234,19 @@ def generate_api_token():
             print(f"🆔 Server ID: {server.id}")
             print(f"🔑 UUID: {server.uuid}")
             print(f"🔐 API KEY: {api_key}")
-            if ip_address:
-                print(f"🌐 IP: {ip_address}")
-            if system_pc:
-                print(f"💻 Система: {system_pc}")
-            if local_name_pc:
-                print(f"🏠 Локальное имя: {local_name_pc}")
+            print(f"🌐 Адрес: {protocol}://{ip_address}:{port}")
+            print(f"💻 Система: {system_pc}")
+            print(f"🏠 Локальное имя: {local_name_pc}")
             print(f"📅 Создан: {server.created_at}")
             print("=" * 50)
+            
+            # Генерируем QR-код с полными данными
+            generate_qr_code(env_data)
         
-        # функция для генерации QR кода с API ключом
-        generate_qr_code()
+    except Exception as e:
+        print(f"\n❌ Ошибка при генерации API токена: {e}")
+        import traceback
+        traceback.print_exc()
 
         # # Дополнительные опции
         # print("\n📋 ДОПОЛНИТЕЛЬНЫЕ ДЕЙСТВИЯ:")
@@ -459,7 +496,7 @@ def main():
                 break
             
             elif choice == '7':
-                run_migrations()
+                # run_migrations()
                 generate_api_token()
                 # После генерации токена не выходим, показываем меню снова
                 input("\nНажмите Enter для продолжения...")

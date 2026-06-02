@@ -9,6 +9,7 @@ class ServerStat(models.Model):
    
     Use_Cpu = models.IntegerField(help_text="CPU(%)")#,null=True, blank=True
     Use_Ram = models.IntegerField(help_text="RAM(%)")
+    Procent_Ram = models.FloatField(help_text="Procent RAM(%)",null=True, blank=True)
     Use_Swap = models.IntegerField(help_text="SWAP")
     # IO = models.FloatField(help_text="Input/Output(%)")
     created_at = models.DateTimeField(auto_now_add=True)

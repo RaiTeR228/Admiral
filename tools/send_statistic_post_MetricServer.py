@@ -6,9 +6,12 @@ import os
 
 load_dotenv()
 
-API_URL = "http://127.0.0.1:8000/api/post-stats/"
+IP_ADDRESS = os.getenv("IP_ADDRESS")
+PORT = os.getenv("PORT")
+PROTOCOL = os.getenv("PROTOCOL")
 API_KEY = os.getenv("API_TOKEN")
 NAME_SERVER = os.getenv("NAME_SERVER")
+API_URL = f"{PROTOCOL}://{IP_ADDRESS}:{PORT}/api/post-stats/"
 
 
 def collect_stats():
@@ -18,7 +21,8 @@ def collect_stats():
     return {
         "Use_Ram": ram['used'],
         "Use_Cpu":cpu['total_cpu_usage'],
-        "Use_Swap": swap['used']
+        "Use_Swap": swap['used'],
+        "Procent_Ram": psutil.virtual_memory().percent,
     }
 
 while True:
