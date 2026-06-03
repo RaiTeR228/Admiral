@@ -5,6 +5,9 @@ import psutil
 from dotenv import load_dotenv
 import os
 
+if sys.platform == "win32":
+    pass
+
 load_dotenv()
 
 IP_ADDRESS = os.getenv("IP_ADDRESS")
@@ -23,9 +26,6 @@ def collect_stats():
     #      "current_temp": 67,
     #  }
 
-    if sys.platform == "win32":
-        pass
-
     temps = psutil.sensors_temperatures()
 
     if temps:
@@ -37,7 +37,7 @@ def collect_stats():
                     status_critical = 0
                 
                 return {
-                    "name": NAME_SERVER,
+                    # "name": NAME_SERVER,
                     "INSTALL_TOKEN": API_KEY,
                     "sensor_name": sensor_name,
                     "status_critical": status_critical,

@@ -4,6 +4,7 @@ from server.models import Server
 class SpeedEth(models.Model):
     server = models.ForeignKey(Server, on_delete=models.CASCADE,null=True, blank=True)
     
+    Interface_name = models.CharField(max_length=255, help_text="Название сетевого интерфейса", default="")
     Eth_sent = models.BigIntegerField(help_text="скорость интернета(отправлено)(bytes)", default=0)
     Eth_recv = models.BigIntegerField(help_text="скорость интернета(получено)(bytes)", default=0)
     Bytes_total_sent = models.BigIntegerField(help_text="Количесво пакетов в байтах, отправленных сервером(bytes)", default=0)

@@ -2,10 +2,11 @@ import sys
 import os
 import requests
 from dotenv import load_dotenv
-load_dotenv()
 
 if sys.platform == "win32":
     pass
+
+load_dotenv()
 
 IP_ADDRESS = os.getenv("IP_ADDRESS")
 PORT = os.getenv("PORT")

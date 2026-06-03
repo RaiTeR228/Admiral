@@ -67,7 +67,7 @@ class UptimeView(APIView):
             if not server:
                 return Response({"error": "Unauthorized"}, status=403)
 
-            uptime = Uptime.objects.all().order_by('-created_at')[:0]
+            uptime = Uptime.objects.filter(server=server).order_by('-created_at')[:0]
             return Response({"uptime": uptime}, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)

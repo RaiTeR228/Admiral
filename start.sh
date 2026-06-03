@@ -21,7 +21,13 @@ echo "Активация виртуального окружения..."
 source venv/bin/activate
 
 echo "Установка зависимостей..."
+pip3 install --upgrade pip
+pip3 install django djangorestframework psycopg django-cors-headers django-filter
 pip install -r "$requirements_file"
 clear
+
+echo "Создание токена для сервера..."
+python3 main.py generate-token
+
 echo "Запуск приложения..."
 python3 main.py run
