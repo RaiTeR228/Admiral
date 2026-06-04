@@ -71,40 +71,37 @@ class ReceiveStatsView(APIView):
             Use_Cpu=cpu_value, 
             Use_Ram=ram_value,    
             Use_Swap=swap_value,  
-            PROCENT_RAM=procent_ram_value,
+            Procent_Ram=procent_ram_value,
             # IO=request.data.get("IO"),
         )
 
         return Response({"status": "ok"})
     
-    def get (self, request):
+    def get(self, request):
         server = get_server_from_request(request)
-
-        def clean_percent(value):
-            if not value:
-                return None  # Возвращаем None, а не Response
-            try:
-                return float(str(value).replace('%', '').strip())
-            except (ValueError, TypeError):
-                return None  # При ошибке конвертации тоже возвращаем None
 
         if not server:
             return Response({"error": "Unauthorized"}, status=403)
         
         try:
             stats = ServerStat.objects.filter(server__id=server.id).order_by('-created_at').first()
+            
+            # Добавьте эту проверку
+            if stats is None:
+                return Response({"error": "No stats found for this server"}, status=404)
+            
             return Response({
-                "success":True,
-                "id":stats.id,
+                "success": True,
+                "id": stats.id,
                 "server_id": server.id,
                 "Use_Cpu": stats.Use_Cpu,
                 "Use_Ram": stats.Use_Ram,
                 "Use_Swap": stats.Use_Swap,
-                "PROCENT_RAM": stats.PROCENT_RAM,
+                "Procent_Ram": stats.Procent_Ram,
                 "created_at": stats.created_at
             })
-        except ServerStat.DoesNotExist:
-            return Response({"error": "No stats found for this server"}, status=404)
+        except Exception as e:  # На всякий случай
+            return Response({"error": str(e)}, status=500)
         # queryset = ServerStat.objects.all().order_by("-created_at")
         # serializer_class = ServerStatSerializer
 

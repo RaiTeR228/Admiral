@@ -4,7 +4,7 @@
 import sys
 
 if sys.platform == "win32":
-    pass
+    sys.exit(0)
     
 import re
 import sys

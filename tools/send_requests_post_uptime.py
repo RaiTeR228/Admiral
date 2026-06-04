@@ -5,7 +5,7 @@ import requests
 import time
 
 if sys.platform == "win32":
-    pass
+    sys.exit(0)
 
 load_dotenv()
 
