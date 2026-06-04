@@ -16,6 +16,7 @@ API_KEY = os.getenv("API_TOKEN")
 NAME_SERVER = os.getenv("NAME_SERVER")
 API_URL = f"{PROTOCOL}://{IP_ADDRESS}:{PORT}/api/uptime/"
 
+# client.py
 def get_system_uptime():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
@@ -23,11 +24,17 @@ def get_system_uptime():
     return int_num
 
 while True:
-    data = get_system_uptime()
+    uptime_value = get_system_uptime()
+
+    payload = {
+        "INSTALL_TOKEN": API_KEY,
+        "uptime": uptime_value
+    }
+    
     try:
         response = requests.post(
             API_URL,
-            json=data,
+            json=payload,
             headers={"Authorization": f"Api-Key {API_KEY}"},
             timeout=5
         )
