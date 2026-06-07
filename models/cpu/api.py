@@ -37,6 +37,7 @@ class CPUMetricsView(APIView):
                 'MAX_CPU_CORES': request.data.get("MAX_CPU_CORES"),
                 'MAX_CPU_THREADS': request.data.get("MAX_CPU_THREADS"),
                 'CPU_NAME': request.data.get("CPU_NAME"),
+                'FREQ':request.data.get("FREQ"),
             }
             
             # 4. Сохраняем или обновляем данные CPU
@@ -55,7 +56,8 @@ class CPUMetricsView(APIView):
                 "data": {
                     "cpu_name": cpu_data['CPU_NAME'],
                     "cores": cpu_data['MAX_CPU_CORES'],
-                    "threads": cpu_data['MAX_CPU_THREADS']
+                    "threads": cpu_data['MAX_CPU_THREADS'],
+                    "freq":cpu_data["FREQ"],
                 }
             }, status=201 if created else 200)
             
@@ -87,7 +89,8 @@ class CPUMetricsView(APIView):
                         "max_cores": cpu_data.MAX_CPU_CORES,
                         "max_threads": cpu_data.MAX_CPU_THREADS,
                         "created_at": cpu_data.created_at,
-                        "updated_at": cpu_data.updated_at
+                        "updated_at": cpu_data.updated_at,
+                        "freq":cpu_data.freq,
                     }
                 })
             except Cpu.DoesNotExist:
@@ -121,7 +124,6 @@ class CPUListView(APIView):
             
             data = []
             for cpu in cpus:
-                # Пытаемся найти相关信息 о сервере
                 server_info = None
                 try:
                     server = Server.objects.get(uuid=cpu.UuidServer)

@@ -67,7 +67,7 @@ def run_migrations():
     # Возвращаемся обратно
     os.chdir(project_root)
 
-def run_django_server(host='127.0.0.1', port='8000'):
+def run_django_server(host='0.0.0.0', port='8000'):
     """Запуск Django сервера"""
     print(f"\n---------- Запуск Django сервера на {host}:{port}")
     os.chdir(model_path)
@@ -373,7 +373,6 @@ def run_all():
     print(f"\n✅ Запущено {len(processes)} сервисов")
     print("Нажмите Ctrl+C для остановки всех сервисов\n")
     
-    # Ждем завершения
     try:
         for name, process in processes:
             process.wait()
@@ -409,9 +408,7 @@ def show_menu():
 
 def main():
     """Главная функция"""
-    # Проверяем аргументы командной строки
     if len(sys.argv) > 1:
-        # Режим командной строки
         command = sys.argv[1]
         
         if command == 'all':
@@ -434,7 +431,6 @@ def main():
             server_name = sys.argv[2] if len(sys.argv) > 2 else None
             delete_server(server_name)
         elif command == 'run':
-            # Новый режим: запуск castm_function
             castm_function()
         else:
             print(f"Неизвестная команда: {command}")
@@ -449,7 +445,6 @@ def main():
             print("  delete-server    - Удалить сервер")
             print("  run              - Запустить кастомную функцию с Django сервером")
     else:
-        # Интерактивный режим
         while True:
             show_menu()
             choice = input("Ваш выбор: ").strip()
@@ -537,7 +532,6 @@ def castm_function():
 
     print("\nВыполнение миграций...")
     run_migrations()
-    
 
     print("\n запуск Django сервера...")
     django_process = run_django_server()
@@ -551,7 +545,7 @@ def castm_function():
     ssh_process = run_ssh_monitor()
     if ssh_process:
         processes.append(('SSH Monitor', ssh_process))
-    
+    # функция для перебора всех файлов с расширение py в папке которые находятся
     all_filenames = glob.glob(f'{tools_path}/*.py')
     for all_filename in all_filenames:
         if Path(all_filename).exists():

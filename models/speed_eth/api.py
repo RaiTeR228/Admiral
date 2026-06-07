@@ -73,6 +73,47 @@ class SpeedEthView(APIView):
             return Response({"error": "An error occurred", "details": str(e)}, status=500)
         
     def get(self, request):
+        server, error_response = get_server_from_api_key(request)
+        
+        if not server:
+            return Response({"error": "Unauthorized"}, status=403)
+        
+        try:
+            # Получаем список уникальных интерфейсов
+            unique_interfaces = SpeedEth.objects.filter(server=server)\
+                .values('Interface_name')\
+                .annotate(last_created=Max('created_at'))
+            
+            if not unique_interfaces:
+                return Response({"error": "No SpeedEth data found for this server"}, status=404)
+            
+            # Для каждого интерфейса получаем последнюю запись
+            data = []
+            for interface in unique_interfaces:
+                latest_entry = SpeedEth.objects.filter(
+                    server=server,
+                    Interface_name=interface['Interface_name'],
+                    created_at=interface['last_created']
+                ).first()
+                
+                if latest_entry:
+                    data.append({
+                        "Interface_name": latest_entry.Interface_name,
+                        "Eth_Sent": latest_entry.Eth_sent,
+                        "Eth_Recv": latest_entry.Eth_recv,
+                        "Bytes_total_Sent": latest_entry.Bytes_total_sent,
+                        "Bytes_total_Recv": latest_entry.Bytes_total_recv,
+                        "created_at": latest_entry.created_at
+                    })
+            
+            return Response(data)
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class GetSpeedViewAllList(APIView):
+        
+    def get(self, request):
         
         server, error_response = get_server_from_api_key(request)
         

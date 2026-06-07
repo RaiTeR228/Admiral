@@ -5,9 +5,6 @@ import psutil
 from dotenv import load_dotenv
 import os
 
-if sys.platform == "win32":
-    sys.exit(0)
-
 load_dotenv()
 
 IP_ADDRESS = os.getenv("IP_ADDRESS")
@@ -17,14 +14,15 @@ API_KEY = os.getenv("API_TOKEN")
 NAME_SERVER = os.getenv("NAME_SERVER")
 API_URL = f"{PROTOCOL}://{IP_ADDRESS}:{PORT}/api/temp/"
 
+
 def collect_stats():
-    #  return {
-    #      "name": NAME_SERVER,
-    #      "INSTALL_TOKEN": API_KEY,
-    #      "sensor_name": "asus",
-    #      "status_critical": None,
-    #      "current_temp": 67,
-    #  }
+    def get_cpu_temperatures():
+        temperatures = psutil.sensors_temperatures()["coretemp"]
+        return [core.current for core in temperatures]
+
+    cpu_temperatures = get_cpu_temperatures()
+    for i, temperature in enumerate(cpu_temperatures):
+        print(f"Температура ядра {i + 1}: {temperature}°C")
 
     temps = psutil.sensors_temperatures()
 
@@ -37,7 +35,6 @@ def collect_stats():
                     status_critical = 0
                 
                 return {
-                    # "name": NAME_SERVER,
                     "INSTALL_TOKEN": API_KEY,
                     "sensor_name": sensor_name,
                     "status_critical": status_critical,

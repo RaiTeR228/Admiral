@@ -135,3 +135,6 @@ pytest
     ./gradlew assembleDebug
 или в релиз
     ./gradlew assembleRelease
+
+очистка кеша компилятора
+	./gradlew clean

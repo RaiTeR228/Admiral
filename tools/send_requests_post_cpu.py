@@ -48,6 +48,7 @@ def collect_stats():
         "MAX_CPU_CORES": str(cpu["physical_cores"]),
         "MAX_CPU_THREADS":  str(cpu["total_cores"]), 
         "CPU_NAME": get_cpu_name(),
+        "FREQ":psutil.cpu_freq(),
     }
 
 data = collect_stats()
