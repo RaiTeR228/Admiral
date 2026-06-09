@@ -138,3 +138,18 @@ pytest
 
 очистка кеша компилятора
 	./gradlew clean
+
+создание проекта 
+	npx create-expo-app <name project>
+
+Запуск проекта через gunicorn
+    gunicorn --bind 0.0.0.0:8000 папка проекта где settings.py и wsgi .wsgi.application 
+
+создаем Сервис
+для автоматизации запуска сервера, чтобы работал всегда
+sudo nano /etc/systemd/system/gunicorn.service
+
+nginx
+nano /etc/nginx/site-available/Admiral
+
+прописываем конф настройки
