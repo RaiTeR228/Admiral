@@ -43,12 +43,12 @@ class ReceiveStatsView(APIView):
         server = get_server_from_request(request)
 
         def clean_percent(value):
-            if not value:
-                return None  # Возвращаем None, а не Response
+            if value is None or value == "":
+                return None
             try:
                 return float(str(value).replace('%', '').strip())
             except (ValueError, TypeError):
-                return None  # При ошибке конвертации тоже возвращаем None
+                return None
 
         if not server:
             return Response({"error": "Unauthorized"}, status=403)

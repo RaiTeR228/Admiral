@@ -102,7 +102,7 @@ class RegisterServerView(APIView):
                     "created_at": server.created_at.isoformat(),
                     "instructions": {
                         "how_to_use": "Use this API key in X-API-Key header for all subsequent requests",
-                        "example": "curl -H 'X-API-Key: YOUR_API_KEY' http://your-server/api/endpoint/",
+                        "example": "curl -H 'X-API-Key: YOUR_API_KEY' http://127.0.0.1/api/endpoint/",
                         "endpoints": [
                             "/api/metrics/ - Send server metrics",
                             "/api/status/ - Check server status"
@@ -136,7 +136,6 @@ class RegisterServerView(APIView):
         name_hash = hashlib.sha256(server_name.encode()).hexdigest()[:8]
         
         return f"{base_key[:40]}_{name_hash}"
-
 
 class GetAPIKeyView(APIView):
     """Получение API ключа для уже зарегистрированного сервера"""

@@ -15,16 +15,14 @@ API_URL = f"{PROTOCOL}://{IP_ADDRESS}:{PORT}/api/post-stats/"
 
 
 def collect_stats():
-    cpu = Cpu_Info()
-    ram = Ram_Info()
-    swap= Swap_Info()
+    mem = psutil.virtual_memory()
+    
     return {
-        "Use_Ram": ram['used'],
-        "Use_Cpu":cpu['total_cpu_usage'],
-        "Use_Swap": swap['used'],
-        "Procent_Ram": psutil.virtual_memory().percent,
+        "Use_Ram": mem.percent,                    # float (например, 42.3)
+        "Use_Cpu": psutil.cpu_percent(),           # float (например, 73.8) — убрал int()
+        "Use_Swap": psutil.swap_memory().percent,  # float (например, 0.0)
+        "Procent_Ram": mem.percent,                # float (например, 42.3)
     }
-
 while True:
     data = collect_stats()
     print("Отправляем:", data)

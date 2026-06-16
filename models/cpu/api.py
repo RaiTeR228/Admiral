@@ -7,12 +7,10 @@ from .models import Cpu
 from server.models import Server 
 
 class CPUMetricsView(APIView):
-    """API для приема и сохранения данных о CPU"""
     permission_classes = [AllowAny]
     
     def post(self, request):
         try:
-            # 1. Проверяем API ключ
             api_key = request.headers.get('Authorization', '').replace('Api-Key ', '')
             if not api_key:
                 api_key = request.headers.get('X-API-Key', '')
@@ -23,7 +21,6 @@ class CPUMetricsView(APIView):
                     "details": "Please provide API key in Authorization header"
                 }, status=401)
             
-            # 2. Находим сервер по API ключу
             try:
                 server = Server.objects.get(api_key=api_key)
             except Server.DoesNotExist:
@@ -32,7 +29,6 @@ class CPUMetricsView(APIView):
                     "details": "No server found with this API key"
                 }, status=401)
             
-            # 3. Получаем данные о CPU из запроса
             cpu_data = {
                 'MAX_CPU_CORES': request.data.get("MAX_CPU_CORES"),
                 'MAX_CPU_THREADS': request.data.get("MAX_CPU_THREADS"),
@@ -40,7 +36,6 @@ class CPUMetricsView(APIView):
                 'FREQ':request.data.get("FREQ"),
             }
             
-            # 4. Сохраняем или обновляем данные CPU
             cpu_instance, created = Cpu.objects.update_or_create(
                 UuidServer=str(server.uuid),  # Преобразуем UUID в строку
                 defaults=cpu_data

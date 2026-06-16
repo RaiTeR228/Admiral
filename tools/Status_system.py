@@ -56,7 +56,7 @@ def Cpu_Info():
         "min_frequency": f"{cpufreq.min:.2f}Mhz",
         "current_frequency": f"{cpufreq.current:.2f}Mhz",
         "cpu_usage_per_core": [f"Core {i}: {percentage}%" for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1))],
-        "total_cpu_usage": f"{psutil.cpu_percent()}%",
+        "total_cpu_usage": psutil.cpu_percent()
     }
 # print(Cpu_Info())
 
@@ -65,7 +65,7 @@ def Ram_Info():
     return {
         "total": get_size(ram.total),
         "available": get_size(ram.available),
-        # "used": get_size(ram.used),
+        "used": ram.used,
         "used": str(ram.used),
         "percentage": ram.percent,
 
