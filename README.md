@@ -22,7 +22,9 @@ Admiral - анализ и сбор инфы мониторинга и серве
 | **частота Cpu Ghz** | ✅ | ✅ |
 | **Темп. каждого ядра** | ❌ | ✅ |
 
-![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/photo_1_2026-05-26_17-18-08.jpg)
-![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/photo_2_2026-05-26_17-18-08.jpg)
-![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/photo_3_2026-05-26_17-18-08.jpg)
-![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/photo_4_2026-05-26_17-18-08.jpg)
+## source Apk приложение
+https://github.com/RaiTeR228/client-app-ms
+
+![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/new_desing/photo_3_2026-06-17_02-17-01.jpg)
+![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/new_desing/photo_2_2026-06-17_02-17-01.jpg)
+![alt text](https://github.com/RaiTeR228/_project_photo_gitHub/blob/main/Admiral/new_desing/photo_1_2026-06-17_02-17-01.jpg)
